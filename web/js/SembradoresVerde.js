@@ -63,7 +63,7 @@ class SembradoresVerde extends MinijuegoBase {
     configurarParcelasYBotones() {
         const totalW = 4 * this.ANCHO_PARCELA + 3 * this.SEP_X;
         const x0 = (this.ANCHO - totalW) / 2;
-        const y0 = 224;
+        const y0 = 236;
 
         this.parcelas = [];
         for (let i = 0; i < 12; i++) {
@@ -90,17 +90,17 @@ class SembradoresVerde extends MinijuegoBase {
             });
         }
 
-        // 3 botones interactivos de herramientas visibles en la parte superior
-        const boxX = 175;
-        const boxY = 114;
-        const anchoBtn = 200;
-        const altoBtn = 54;
-        const yBtn = boxY + 30;
+        // 3 ranuras compactas de herramientas estilo videojuego (Hotbar clásica)
+        const anchoSlot = 48;
+        const altoSlot = 48;
+        const gapSlot = 10;
+        const xHotbar0 = 418;
+        const yHotbar = 130;
 
         this.botonesHerramientas = [
-            { id: 'SEMILLA', x: boxX + 16, y: yBtn, w: anchoBtn, h: altoBtn, nombre: '1. Sembrar', subtitulo: 'Planta semillas', tecla: '1', color: '#16A34A' },
-            { id: 'REGADERA', x: boxX + 16 + anchoBtn + 14, y: yBtn, w: anchoBtn, h: altoBtn, nombre: '2. Regar', subtitulo: 'Solo tierra seca', tecla: '2', color: '#0284C7' },
-            { id: 'RECOGER', x: boxX + 16 + (anchoBtn + 14) * 2, y: yBtn, w: anchoBtn, h: altoBtn, nombre: '3. Limpiar', subtitulo: 'Recoge basura', tecla: '3', color: '#D97706' }
+            { id: 'SEMILLA', x: xHotbar0, y: yHotbar, w: anchoSlot, h: altoSlot, nombre: 'Sembrar', tecla: '1' },
+            { id: 'REGADERA', x: xHotbar0 + anchoSlot + gapSlot, y: yHotbar, w: anchoSlot, h: altoSlot, nombre: 'Regar', tecla: '2' },
+            { id: 'RECOGER', x: xHotbar0 + (anchoSlot + gapSlot) * 2, y: yHotbar, w: anchoSlot, h: altoSlot, nombre: 'Limpiar', tecla: '3' }
         ];
     }
 
@@ -143,7 +143,6 @@ class SembradoresVerde extends MinijuegoBase {
         this.herramientaActual = 'SEMILLA';
         this.plantasFlorecidasTotales = 0;
         this.proximaBasura = 6.0;
-        this.hablarMascota('¡Usa [1] Sembrar, [2] Regar y [3] Limpiar arriba!', 4.5);
 
         this.parcelas.forEach(p => {
             p.estado = 'VACIA';
@@ -287,9 +286,9 @@ class SembradoresVerde extends MinijuegoBase {
     }
 
     alPresionar(x, y) {
-        // 1. Revisar si pulsó un botón de herramienta en la barra inferior
+        // 1. Revisar si pulsó un botón de herramienta en la hotbar superior
         for (const btn of this.botonesHerramientas) {
-            if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
+            if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h + 16) {
                 this.seleccionarHerramienta(btn.id);
                 return;
             }
@@ -302,46 +301,44 @@ class SembradoresVerde extends MinijuegoBase {
         const cx = parcela.x + parcela.w / 2;
         const cy = parcela.y + parcela.h / 2;
 
-        // Asistencia pedagógica: si hay basura y el niño toca la parcela, recogerla de inmediato
+        // Asistencia pedagógica inmediata: si hay basura, se recoge al pulsar sobre ella
         if (parcela.basura) {
             parcela.basura = false;
-            this.acierto(8, cx, cy, 'BASURA', '¡BASURA RECOGIDA!');
+            this.acierto(8, cx, cy, 'BASURA', '¡LIMPIO!');
             this.crearChispas(cx, cy, '#10B981', 18);
             window.audioEco.recoger();
-            this.mostrarToastInfo('¡Residuo recogido! Tierra lista para sembrar.');
+            this.mostrarToastInfo('¡Residuo retirado! Tierra limpia.');
             return;
         }
 
-        // Si la planta está marchita y el niño la toca, limpiarla para acondicionar el suelo
+        // Si la planta está seca/marchita, retirarla para reacondicionar el suelo
         if (parcela.estado === 'SECA') {
             parcela.estado = 'VACIA';
             parcela.agua = 0;
             parcela.crecimiento = 0;
             parcela.sinAgua = 0;
-            this.acierto(5, cx, cy, 'BASURA', '¡SUELO LIMPIO!');
+            this.acierto(5, cx, cy, 'BASURA', '¡SUELO LISTO!');
             this.crearChispas(cx, cy, '#D97706', 14);
-            this.mostrarToastInfo('Tierra acondicionada: ¡Siembra con Semilla [1]!');
+            this.mostrarToastInfo('Tierra acondicionada: ¡Lista para sembrar [1]!');
             return;
         }
 
         switch (this.herramientaActual) {
             case 'SEMILLA': {
-                if (parcela.estado !== 'VACIA') {
-                    if (parcela.agua < this.LIMITE_HUMEDA) {
-                        this.mostrarToastInfo('Esta planta necesita agua. Usa la Regadera (Tecla 2)');
-                    } else {
-                        this.mostrarToastInfo('Esta parcela ya tiene un cultivo creciendo bien');
-                    }
-                    this.crearChispas(cx, cy, '#CBD5E1', 6);
-                } else {
+                if (parcela.estado === 'VACIA') {
                     // Sembrar con éxito
                     parcela.estado = 'CRECIENDO';
                     parcela.agua = 0.75;
                     parcela.crecimiento = 0;
                     parcela.sinAgua = 0;
 
-                    this.acierto(6, cx, cy - 8, 'SIEMBRA', '¡SEMBRADO!');
+                    this.acierto(6, cx, cy - 8, 'SIEMBRA');
                     this.crearChispas(cx, cy - 8, '#4ADE80', 16);
+                } else if (parcela.estado === 'CRECIENDO' && parcela.agua < this.LIMITE_HUMEDA) {
+                    this.mostrarToastInfo('Esta planta necesita agua: usa Regar [2]');
+                } else {
+                    this.mostrarToastInfo('Esta parcela ya tiene un cultivo activo');
+                    this.crearChispas(cx, cy, '#CBD5E1', 6);
                 }
                 break;
             }
@@ -355,23 +352,25 @@ class SembradoresVerde extends MinijuegoBase {
                         parcela.agua = 1.0;
                         parcela.sinAgua = 0;
 
-                        this.acierto(bonoSed, cx, cy - 14, 'RIEGO', '¡RIEGO ÓPTIMO!');
+                        this.acierto(bonoSed, cx, cy - 14, 'RIEGO');
                         this.crearChispas(cx, cy - 10, '#38BDF8', 22);
                     } else {
-                        // ¡ERROR PEDAGÓGICO DE RIEGO EN EXCESO!
+                        // ERROR PEDAGÓGICO DE RIEGO EN EXCESO
                         this.registrarError('¡Demasiada agua! La tierra aún está húmeda. Regar de más asfixia las raíces.', 0.06);
                     }
                 } else if (parcela.estado === 'VACIA') {
-                    this.mostrarToastInfo('La parcela está vacía. Siembra primero con Semilla (Tecla 1)');
+                    this.mostrarToastInfo('Siembra una semilla primero con [1]');
+                } else {
+                    this.mostrarToastInfo('Esta planta ya está florecida');
                 }
                 break;
             }
             case 'RECOGER':
             default: {
                 if (parcela.estado === 'VACIA') {
-                    this.mostrarToastInfo('La parcela ya está limpia. Siembra con Semilla (Tecla 1)');
+                    this.mostrarToastInfo('La tierra está limpia. Siembra con Semilla [1]');
                 } else {
-                    this.mostrarToastInfo('El cultivo está sano, no hay residuos que retirar');
+                    this.mostrarToastInfo('No hay residuos que recoger en esta parcela');
                 }
                 break;
             }
@@ -894,108 +893,75 @@ class SembradoresVerde extends MinijuegoBase {
     }
 
     dibujarBarraHerramientas(ctx) {
-        const boxX = 175;
-        const boxY = 114;
-        const boxW = 650;
-        const boxH = 96;
-
+        // Marco de la bandeja de herramientas estilo videojuego (Hotbar clásica)
         ctx.save();
-        // Contenedor general superior con estilo tablero de madera y cartel escolar
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxW, boxH, 16);
-        ctx.fill();
+        ctx.fillStyle = '#1E1B2E';
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(410, 124, 180, 76, 12);
+        ctx.fill();
         ctx.stroke();
 
-        // Franja de encabezado superior con instrucciones claras
-        ctx.fillStyle = '#2A2340';
-        ctx.font = '900 11.5px "Segoe UI", system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('HERRAMIENTAS: HAZ CLIC EN EL BOTÓN O USA LAS TECLAS [1], [2] O [3]', boxX + boxW / 2, boxY + 16);
+        // Borde interior sutil
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(412, 126, 176, 72, 10);
+        ctx.stroke();
 
         this.botonesHerramientas.forEach(btn => {
             const activa = btn.id === this.herramientaActual;
             const hover = this.puntoEnRect(this.ratonX, this.ratonY, btn);
 
-            ctx.save();
-            if (activa) {
-                ctx.shadowColor = btn.color;
-                ctx.shadowBlur = 10;
-            }
-
-            let fondoBtn = '#F8FAFC';
-            let bordeBtn = '#CBD5E1';
-            let textoBtn = '#334155';
-
-            if (activa) {
-                if (btn.id === 'SEMILLA') { fondoBtn = '#DCFCE7'; bordeBtn = '#16A34A'; textoBtn = '#14532D'; }
-                else if (btn.id === 'REGADERA') { fondoBtn = '#E0F2FE'; bordeBtn = '#0284C7'; textoBtn = '#0C4A6E'; }
-                else { fondoBtn = '#FEF3C7'; bordeBtn = '#D97706'; textoBtn = '#78350F'; }
-            } else if (hover) {
-                fondoBtn = '#F1F5F9';
-                bordeBtn = '#94A3B8';
-            }
-
-            // Cuerpo del botón
-            ctx.fillStyle = fondoBtn;
+            // Casilla de inventario
+            ctx.fillStyle = activa ? '#2A2340' : (hover ? '#334155' : '#1E293B');
+            ctx.strokeStyle = activa ? '#FBBF24' : (hover ? '#64748B' : '#334155');
+            ctx.lineWidth = activa ? 3 : 1.5;
             ctx.beginPath();
-            ctx.roundRect(btn.x, btn.y, btn.w, btn.h, 12);
+            ctx.roundRect(btn.x, btn.y, btn.w, btn.h, 8);
             ctx.fill();
-
-            ctx.strokeStyle = bordeBtn;
-            ctx.lineWidth = activa ? 3.5 : 2;
             ctx.stroke();
 
-            // Etiqueta de la tecla de atajo rápida
-            ctx.fillStyle = activa ? bordeBtn : '#64748B';
+            // Resalte dorado en esquina para el slot seleccionado
+            if (activa) {
+                ctx.fillStyle = '#FBBF24';
+                ctx.beginPath();
+                ctx.arc(btn.x + btn.w - 5, btn.y + 5, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Badge numérico en la esquina superior izquierda [1], [2], [3]
+            const bX = btn.x + 3;
+            const bY = btn.y + 3;
+            ctx.fillStyle = activa ? '#F59E0B' : '#0F172A';
             ctx.beginPath();
-            ctx.roundRect(btn.x + 8, btn.y + 11, 32, 32, 8);
+            ctx.roundRect(bX, bY, 14, 13, 3);
             ctx.fill();
 
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
+            ctx.fillStyle = activa ? '#000000' : '#E2E8F0';
+            ctx.font = '900 10px "Segoe UI", system-ui, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(btn.tecla, btn.x + 24, btn.y + 27);
+            ctx.fillText(btn.tecla, bX + 7, bY + 6.5);
 
-            // Icono vectorial de la herramienta
-            const icX = btn.x + 58;
-            const icY = btn.y + btn.h / 2;
+            // Icono vectorial centrado en el slot
+            const icX = btn.x + btn.w / 2;
+            const icY = btn.y + btn.h / 2 + 1;
             if (btn.id === 'SEMILLA') {
-                this.dibujarIconoSemilla(ctx, icX, icY, 0.65);
+                this.dibujarIconoSemilla(ctx, icX, icY, 0.78);
             } else if (btn.id === 'REGADERA') {
-                this.dibujarIconoRegadera(ctx, icX, icY, 0.65);
+                this.dibujarIconoRegadera(ctx, icX - 2, icY, 0.82);
             } else {
-                this.dibujarIconoRecoger(ctx, icX, icY, 0.65);
+                this.dibujarIconoRecoger(ctx, icX, icY, 0.85);
             }
 
-            // Textos informativos dentro del botón
-            ctx.fillStyle = textoBtn;
-            ctx.font = '900 14px "Segoe UI", system-ui, sans-serif';
-            ctx.textAlign = 'left';
+            // Etiqueta limpia debajo de cada slot
+            ctx.fillStyle = activa ? '#FDE047' : '#94A3B8';
+            ctx.font = 'bold 10px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(btn.nombre, btn.x + 82, btn.y + 20);
-
-            ctx.font = '700 11px "Segoe UI", system-ui, sans-serif';
-            ctx.fillStyle = activa ? textoBtn : '#64748B';
-            ctx.fillText(btn.subtitulo || btn.desc, btn.x + 82, btn.y + 36);
-
-            // Badge de "ACTIVA" si está seleccionada
-            if (activa) {
-                ctx.fillStyle = bordeBtn;
-                ctx.beginPath();
-                ctx.roundRect(btn.x + btn.w - 22, btn.y + 6, 16, 16, 8);
-                ctx.fill();
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = '900 10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('✓', btn.x + btn.w - 14, btn.y + 14);
-            }
-
-            ctx.restore();
+            ctx.fillText(btn.nombre, btn.x + btn.w / 2, 190);
         });
 
         ctx.restore();
@@ -1033,20 +999,31 @@ class SembradoresVerde extends MinijuegoBase {
         ctx.translate(cx, cy);
         ctx.scale(s, s);
 
-        // Bolsa de semillas marrón
+        // Saquito de semillas marrón
         ctx.fillStyle = '#D97706';
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.roundRect(-16, -18, 32, 36, 6);
+        ctx.roundRect(-13, -10, 26, 26, 6);
         ctx.fill();
         ctx.stroke();
 
-        // Brote verde en la bolsa
-        ctx.fillStyle = '#4ADE80';
+        // Cierre superior del saquito
+        ctx.fillStyle = '#B45309';
         ctx.beginPath();
-        ctx.ellipse(0, 0, 7, 10, 0.2, 0, Math.PI * 2);
+        ctx.roundRect(-10, -15, 20, 6, 3);
         ctx.fill();
+        ctx.stroke();
+
+        // Brote verde brillante saliendo
+        ctx.fillStyle = '#4ADE80';
+        ctx.strokeStyle = '#15803D';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 3, 5, 8, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
         ctx.restore();
     }
 
@@ -1056,30 +1033,37 @@ class SembradoresVerde extends MinijuegoBase {
         ctx.scale(s, s);
 
         // Pico vertedor
-        ctx.fillStyle = '#0284C7';
+        ctx.fillStyle = '#38BDF8';
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.moveTo(8, -2);
-        ctx.lineTo(24, -14);
-        ctx.lineTo(26, -10);
-        ctx.lineTo(10, 6);
+        ctx.moveTo(5, -2);
+        ctx.lineTo(19, -12);
+        ctx.lineTo(21, -8);
+        ctx.lineTo(7, 6);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Cuerpo de la regadera
+        // Cuerpo regadera
+        ctx.fillStyle = '#0284C7';
         ctx.beginPath();
-        ctx.roundRect(-16, -8, 26, 24, 6);
+        ctx.roundRect(-13, -7, 20, 20, 5);
         ctx.fill();
         ctx.stroke();
 
         // Asa
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 3.5;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(-16, 4, 12, Math.PI * 0.5, Math.PI * 1.5);
+        ctx.arc(-13, 3, 9, Math.PI * 0.5, Math.PI * 1.5);
         ctx.stroke();
+
+        // Gotita brillante
+        ctx.fillStyle = '#BAE6FD';
+        ctx.beginPath();
+        ctx.arc(20, -14, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
     }
@@ -1089,25 +1073,37 @@ class SembradoresVerde extends MinijuegoBase {
         ctx.translate(cx, cy);
         ctx.scale(s, s);
 
-        // Bolsa ecológica verde
-        ctx.fillStyle = '#15803D';
+        // Mango de madera de la escobilla de jardín
+        ctx.strokeStyle = '#D97706';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-10, -12);
+        ctx.lineTo(3, 3);
+        ctx.stroke();
+
+        // Cepillo de cerdas verdes de limpieza
+        ctx.fillStyle = '#10B981';
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(-14, -10, 28, 28, 6);
+        ctx.moveTo(1, 1);
+        ctx.lineTo(15, -6);
+        ctx.lineTo(17, 13);
+        ctx.lineTo(4, 9);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Asas
+        // Cerdas
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(0, -10, 8, Math.PI, 0);
+        ctx.moveTo(7, 3);
+        ctx.lineTo(13, 10);
+        ctx.moveTo(10, -1);
+        ctx.lineTo(15, 6);
         ctx.stroke();
-
-        // Símbolo de reciclaje o brote blanco
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(0, 4, 5, 0, Math.PI * 2);
-        ctx.fill();
 
         ctx.restore();
     }
