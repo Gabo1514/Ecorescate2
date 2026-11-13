@@ -46,4 +46,3 @@ El juego está desarrollado en **HTML5 Canvas, Vanilla JavaScript y Web Audio AP
 * **14 Medallas Coleccionables:** Reconocimientos al ahorro de agua, velocidad de reciclaje, siembra óptima y conocimiento ecológico.
 * **Desafío del Saber:** Preguntas pedagógicas contextualizadas sobre la geografía, fauna (como el huerequeque) y recursos hídricos de Ica.
 * **Modo Eco-Frenesí y Eco-Burbujas:** Multiplicadores dobles de puntos, burbujas de bonificación y retroalimentación visual dinámica.
-* **Exportación de Datos en CSV:** Permite a los docentes descargar el progreso y métricas de impacto ambiental de cada estudiante.

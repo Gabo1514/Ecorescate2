@@ -161,12 +161,6 @@ class AppEcoRescate {
             window.audioEco.clic();
             this.cerrarModal(this.modalImpacto);
         });
-
-        // Exportar a CSV
-        document.getElementById('btnExportarCSV').addEventListener('click', () => {
-            window.audioEco.moneda();
-            window.storageEco.exportarCSV();
-        });
     }
 
     comprobarEstudiante() {

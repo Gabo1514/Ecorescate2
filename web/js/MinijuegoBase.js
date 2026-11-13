@@ -39,11 +39,22 @@ class MinijuegoBase {
         this.tiempoLimite = 120;
         this.progresoRetos = {};
 
-        // Efectos visuales
+        // Efectos visuales y jugosidad (Game Juice)
         this.sacudida = 0;
         this.confetiParticulas = [];
         this.chispasParticulas = [];
+        this.textosFlotantes = [];
         this.palabraCombo = null; // { texto, tiempo, duracion, x, y }
+
+        // Mecánicas de enganche infantil (Eco-Frenesí, Burbujas y Mascota)
+        this.frenesiActivo = false;
+        this.frenesiTiempo = 0;
+        this.ecoBurbujas = [];
+        this.siguienteBurbuja = 12 + Math.random() * 8;
+        this.mascotaMensaje = null;
+        this.tiempoEnVictoria = 0;
+        this.estrellasSonadas = [false, false, false];
+        this._avisoPocoTiempo = false;
 
         // Mensaje y pistas educativas
         this.mensajeToast = null; // { texto, esError, tiempo }
@@ -205,6 +216,15 @@ class MinijuegoBase {
         this.palabraCombo = null;
         this.confetiParticulas = [];
         this.chispasParticulas = [];
+        this.textosFlotantes = [];
+        this.frenesiActivo = false;
+        this.frenesiTiempo = 0;
+        this.ecoBurbujas = [];
+        this.siguienteBurbuja = 12 + Math.random() * 8;
+        this.mascotaMensaje = { texto: `¡Nivel ${this.nivelNumero}! ¡Tú puedes, Eco-Héroe!`, tiempo: 3.5 };
+        this.tiempoEnVictoria = 0;
+        this.estrellasSonadas = [false, false, false];
+        this._avisoPocoTiempo = false;
         this.preguntaActiva = null;
         this.respuestaSeleccionada = -1;
         this.mostrarExplicacionPregunta = false;
@@ -270,7 +290,7 @@ class MinijuegoBase {
             this.sacudida = Math.max(0, this.sacudida - dt * 2.5);
         }
 
-        // Actualizar partículas
+        // Actualizar partículas y textos flotantes
         this.actualizarParticulas(dt);
 
         // Actualizar palabras de combo
@@ -289,9 +309,74 @@ class MinijuegoBase {
             }
         }
 
+        // Actualizar mensaje de la mascota Chaski
+        if (this.mascotaMensaje) {
+            this.mascotaMensaje.tiempo -= dt;
+            if (this.mascotaMensaje.tiempo <= 0) {
+                this.mascotaMensaje = null;
+            }
+        }
+
+        // Si estamos en pantalla de FIN, contar tiempo para celebración de estrellas
+        if (this.estado === 'FIN') {
+            this.tiempoEnVictoria += dt;
+            if (this.gano) {
+                if (this.tiempoEnVictoria >= 0.35 && !this.estrellasSonadas[0] && this.estrellasNivel >= 1) {
+                    this.estrellasSonadas[0] = true;
+                    if (window.audioEco.estrellaImpacto) window.audioEco.estrellaImpacto(0);
+                }
+                if (this.tiempoEnVictoria >= 0.75 && !this.estrellasSonadas[1] && this.estrellasNivel >= 2) {
+                    this.estrellasSonadas[1] = true;
+                    if (window.audioEco.estrellaImpacto) window.audioEco.estrellaImpacto(1);
+                }
+                if (this.tiempoEnVictoria >= 1.15 && !this.estrellasSonadas[2] && this.estrellasNivel >= 3) {
+                    this.estrellasSonadas[2] = true;
+                    if (window.audioEco.estrellaImpacto) window.audioEco.estrellaImpacto(2);
+                    this.crearConfeti(60);
+                }
+            }
+        }
+
         // Si estamos jugando, correr tiempo y reglas
         if (this.estado === 'JUGANDO') {
             this.tiempoJuego += dt;
+
+            // Actualizar modo Eco-Frenesí
+            if (this.frenesiActivo) {
+                this.frenesiTiempo -= dt;
+                if (this.frenesiTiempo <= 0) {
+                    this.frenesiActivo = false;
+                    this.frenesiTiempo = 0;
+                } else if (Math.random() < 0.28) {
+                    this.crearChispas(this.ESC_X + Math.random() * this.ESC_W, this.ESC_Y + Math.random() * this.ESC_H, '#F59E0B', 2);
+                }
+            }
+
+            // Generar Eco-Burbujas flotantes de recompensa periódicas
+            this.siguienteBurbuja -= dt;
+            if (this.siguienteBurbuja <= 0 && this.ecoBurbujas.length < 2) {
+                this.spawnEcoBurbuja();
+                this.siguienteBurbuja = 14 + Math.random() * 8;
+            }
+
+            // Mover y actualizar Eco-Burbujas
+            for (let i = this.ecoBurbujas.length - 1; i >= 0; i--) {
+                const b = this.ecoBurbujas[i];
+                b.tiempo += dt;
+                b.x += b.vx * dt;
+                b.y += b.vy * dt + Math.sin(b.tiempo * 3) * 0.45;
+                b.rotacion += dt * 1.5;
+                b.vida -= dt;
+                if (b.vida <= 0 || b.x < this.ESC_X - 40 || b.x > this.ESC_DER + 40 || b.y < this.ESC_Y - 40 || b.y > this.ESC_ABA + 40) {
+                    this.ecoBurbujas.splice(i, 1);
+                }
+            }
+
+            // Aviso oportuno de poco tiempo restante
+            if (this.tiempoLimite - this.tiempoJuego <= 16 && !this._avisoPocoTiempo) {
+                this._avisoPocoTiempo = true;
+                this.hablarMascota('¡Quedan pocos segundos! ¡Rápido!');
+            }
 
             // Revisar tiempo agotado
             if (this.tiempoJuego >= this.tiempoLimite) {
@@ -322,6 +407,84 @@ class MinijuegoBase {
         }
     }
 
+    crearTextoFlotante(texto, x, y, color = '#10B981', escala = 1.0) {
+        this.textosFlotantes.push({
+            texto,
+            x: Math.max(this.ESC_X + 50, Math.min(this.ESC_DER - 50, x)),
+            y: Math.max(this.ESC_Y + 40, Math.min(this.ESC_ABA - 40, y)),
+            color,
+            vy: -55,
+            alfa: 1.0,
+            escala,
+            tiempo: 0,
+            duracion: 1.15
+        });
+    }
+
+    activarFrenesi(duracion = 7.0) {
+        this.frenesiActivo = true;
+        this.frenesiTiempo = duracion;
+        if (window.audioEco.frenesi) window.audioEco.frenesi();
+        else window.audioEco.poder();
+        this.crearChispas(this.ANCHO / 2, 240, '#F59E0B', 35);
+        this.crearTextoFlotante('¡ECO-FRENESÍ! PUNTOS ×2', this.ANCHO / 2, 230, '#F59E0B', 1.45);
+        this.hablarMascota('¡ECO-FRENESÍ! ¡Puntos dobles!');
+    }
+
+    spawnEcoBurbuja() {
+        const tipos = ['TIEMPO', 'MONEDAS', 'FRENESI'];
+        const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+        const radio = 25;
+        const ladoIzquierdo = Math.random() < 0.5;
+        const x = ladoIzquierdo ? this.ESC_X + 24 : this.ESC_DER - 24;
+        const y = this.ESC_Y + 70 + Math.random() * (this.ESC_H - 140);
+        const vx = (ladoIzquierdo ? 1 : -1) * (26 + Math.random() * 22);
+        const vy = (Math.random() - 0.5) * 16;
+
+        this.ecoBurbujas.push({
+            tipo,
+            x,
+            y,
+            radio,
+            vx,
+            vy,
+            rotacion: 0,
+            tiempo: 0,
+            vida: 14.0
+        });
+    }
+
+    explotarEcoBurbuja(b, indice) {
+        this.ecoBurbujas.splice(indice, 1);
+        if (window.audioEco.burbuja) window.audioEco.burbuja();
+        else window.audioEco.estrella();
+
+        const col = b.tipo === 'TIEMPO' ? '#38BDF8' : (b.tipo === 'MONEDAS' ? '#F59E0B' : '#A855F7');
+        this.crearChispas(b.x, b.y, col, 24);
+
+        if (b.tipo === 'TIEMPO') {
+            this.tiempoLimite += 7;
+            this.crearTextoFlotante('+7s TIEMPO EXTRA', b.x, b.y, '#38BDF8', 1.3);
+            this.hablarMascota('¡+7 segundos de tiempo extra!');
+        } else if (b.tipo === 'MONEDAS') {
+            this.puntaje += 40;
+            const perfil = window.storageEco.obtenerPerfil();
+            if (perfil) {
+                perfil.monedas = (perfil.monedas || 0) + 15;
+                window.storageEco.guardarPerfiles();
+            }
+            if (window.audioEco.moneda) window.audioEco.moneda();
+            this.crearTextoFlotante('+15 EcoMonedas', b.x, b.y, '#F59E0B', 1.3);
+            this.hablarMascota('¡Bonus: +15 EcoMonedas!');
+        } else if (b.tipo === 'FRENESI') {
+            this.activarFrenesi(8.0);
+        }
+    }
+
+    hablarMascota(texto, duracion = 3.2) {
+        this.mascotaMensaje = { texto, tiempo: duracion };
+    }
+
     mostrarDatoCurioso() {
         this.modalDatoActivo = true;
         this.estado = 'PAUSA';
@@ -335,26 +498,29 @@ class MinijuegoBase {
     }
 
     // Aciertos, errores y combos
-    acierto(ptsBase = 10, x = null, y = null, claveReto = null) {
+    acierto(ptsBase = 10, x = null, y = null, claveReto = null, textoEspecial = null) {
         let clave = claveReto;
         let pts = ptsBase;
         if (typeof ptsBase === 'string') {
             clave = ptsBase;
             pts = 10;
         }
-        this.registrarAcierto(clave, 1, pts);
+        this.registrarAcierto(clave, 1, pts, x, y, textoEspecial);
         if (typeof x === 'number' && typeof y === 'number') {
-            this.crearChispas(x, y, '#FFD84D', 12);
+            this.crearChispas(x, y, this.frenesiActivo ? '#F59E0B' : '#FFD84D', 14);
         }
     }
 
-    registrarAcierto(claveReto = null, cantidad = 1, ptsBase = 10) {
+    registrarAcierto(claveReto = null, cantidad = 1, ptsBase = 10, x = null, y = null, textoEspecial = null) {
         this.racha++;
         if (this.racha > this.mejorCombo) {
             this.mejorCombo = this.racha;
         }
 
-        const multiplicador = Math.min(5, Math.floor((this.racha - 1) / 2) + 1);
+        let multiplicador = Math.min(5, Math.floor((this.racha - 1) / 2) + 1);
+        if (this.frenesiActivo) {
+            multiplicador *= 2;
+        }
         const puntosGanados = ptsBase * multiplicador;
         this.puntaje += puntosGanados;
         this.aciertos += cantidad;
@@ -363,11 +529,9 @@ class MinijuegoBase {
         if (claveReto && this.progresoRetos[claveReto] !== undefined) {
             this.progresoRetos[claveReto] += cantidad;
         }
-        // Reto especial 'ACIERTOS'
         if (this.progresoRetos['ACIERTOS'] !== undefined) {
             this.progresoRetos['ACIERTOS'] += cantidad;
         }
-        // Reto especial 'COMBO'
         if (this.progresoRetos['COMBO'] !== undefined && this.racha >= this.progresoRetos['COMBO']) {
             this.progresoRetos['COMBO'] = this.racha;
         }
@@ -375,28 +539,44 @@ class MinijuegoBase {
         // Sonido y palabras de racha
         window.audioEco.acierto(multiplicador);
 
+        // Texto flotante de gratificación instantánea
+        const posX = x !== null ? x : (this.ANCHO / 2 + (Math.random() - 0.5) * 80);
+        const posY = y !== null ? y : (this.ALTO / 2 - 30);
+        const txtAcierto = textoEspecial ? `+${puntosGanados} ${textoEspecial}` : (this.frenesiActivo ? `+${puntosGanados} ¡FRENESÍ!` : (this.racha >= 2 ? `+${puntosGanados} ¡COMBO ×${multiplicador}!` : `+${puntosGanados}`));
+        const colAcierto = this.frenesiActivo ? '#F59E0B' : (this.racha >= 3 ? '#A855F7' : '#10B981');
+        this.crearTextoFlotante(txtAcierto, posX, posY, colAcierto, this.racha >= 3 ? 1.25 : 1.1);
+
+        // Disparar Eco-Frenesí al llegar a racha 4
+        if (this.racha === 4 && !this.frenesiActivo) {
+            this.activarFrenesi(7.0);
+        }
+
         if (this.racha >= 2) {
             let texto = '¡BIEN!';
-            if (this.racha >= 7) texto = '¡ECO-HÉROE!';
-            else if (this.racha >= 5) texto = '¡SÚPER!';
+            if (this.racha >= 8) texto = '¡LEGENDARIO!';
+            else if (this.racha >= 6) texto = '¡ECO-HÉROE!';
+            else if (this.racha >= 4) texto = '¡IMPARABLE!';
             else if (this.racha >= 3) texto = '¡GENIAL!';
 
             this.palabraCombo = {
                 texto: `${texto} ×${multiplicador}`,
                 tiempo: 0,
-                duracion: 0.9,
+                duracion: 0.95,
                 x: this.ANCHO / 2,
                 y: 280
             };
             if (this.racha === 3 || this.racha === 5 || this.racha === 7) {
                 window.audioEco.combo();
-                this.crearChispas(this.ANCHO / 2, 280, '#FFD84D', 20);
+                this.crearChispas(this.ANCHO / 2, 280, '#FFD84D', 22);
+                this.hablarMascota(this.racha >= 6 ? '¡Racha asombrosa, eres un maestro!' : '¡Genial combo! ¡No te detengas!');
             }
         }
     }
 
     registrarError(explicacion = null, penalizacionMedidor = 0.25) {
         this.racha = 0;
+        this.frenesiActivo = false;
+        this.frenesiTiempo = 0;
         this.errores++;
         this.medidor = Math.max(0, this.medidor - penalizacionMedidor);
         this.sacudida = 0.4;
@@ -408,6 +588,9 @@ class MinijuegoBase {
                 esError: true,
                 tiempo: 3.5
             };
+            this.hablarMascota('¡Cuidado! ' + explicacion);
+        } else {
+            this.hablarMascota('¡Concéntrate! ¡Tú puedes hacerlo bien!');
         }
     }
 
@@ -553,6 +736,17 @@ class MinijuegoBase {
                 this.chispasParticulas.splice(i, 1);
             }
         }
+
+        // Textos flotantes jugosos
+        for (let i = this.textosFlotantes.length - 1; i >= 0; i--) {
+            const t = this.textosFlotantes[i];
+            t.y += t.vy * dt;
+            t.tiempo += dt;
+            t.alfa = Math.max(0, 1 - (t.tiempo / t.duracion));
+            if (t.tiempo >= t.duracion) {
+                this.textosFlotantes.splice(i, 1);
+            }
+        }
     }
 
     // Renderizado general
@@ -595,14 +789,56 @@ class MinijuegoBase {
         // Partículas en la escena
         this.dibujarParticulas(ctx);
 
+        // Eco-Burbujas flotantes de bonus
+        if (this.estado === 'JUGANDO') {
+            this.dibujarEcoBurbujas(ctx);
+        }
+
+        // Textos flotantes de gratificación instantánea
+        this.dibujarTextosFlotantes(ctx);
+
+        // Chaski el Huerequeque (Mascota animada de Ica)
+        this.dibujarMascota(ctx);
+
         ctx.restore();
 
         // Borde estilizado del lienzo de juego (estilo caricatura)
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.roundRect(this.ESC_X, this.ESC_Y, this.ESC_W, this.ESC_H, 16);
-        ctx.stroke();
+        if (this.frenesiActivo) {
+            const tono = (this.relojTotal * 220) % 360;
+            ctx.save();
+            ctx.shadowColor = `hsl(${tono}, 100%, 55%)`;
+            ctx.shadowBlur = 18;
+            ctx.strokeStyle = `hsl(${tono}, 100%, 65%)`;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.roundRect(this.ESC_X, this.ESC_Y, this.ESC_W, this.ESC_H, 16);
+            ctx.stroke();
+
+            // Banner superior de Frenesí
+            const pulsoF = 1.0 + Math.sin(this.relojTotal * 9) * 0.05;
+            ctx.translate(this.ANCHO / 2, this.ESC_Y + 22);
+            ctx.scale(pulsoF, pulsoF);
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(-140, -14, 280, 28, 14);
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '900 13px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`¡ECO-FRENESÍ: ×2 PUNTOS! (${Math.ceil(this.frenesiTiempo)}s)`, 0, 0);
+            ctx.restore();
+        } else {
+            ctx.strokeStyle = '#2A2340';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.roundRect(this.ESC_X, this.ESC_Y, this.ESC_W, this.ESC_H, 16);
+            ctx.stroke();
+        }
 
         // 3. Barra inferior de pistas / resumen
         this.dibujarPie(ctx);
@@ -633,6 +869,291 @@ class MinijuegoBase {
             this.dibujarModalPregunta(ctx);
         } else if (this.estado === 'FIN') {
             this.dibujarModalFin(ctx);
+        }
+
+        ctx.restore();
+    }
+
+    dibujarEcoBurbujas(ctx) {
+        for (const b of this.ecoBurbujas) {
+            ctx.save();
+            const wX = Math.sin(b.tiempo * 4) * 2;
+            const wY = Math.cos(b.tiempo * 3) * 2;
+            const cx = b.x + wX;
+            const cy = b.y + wY;
+            const r = b.radio;
+
+            const colBorde = b.tipo === 'TIEMPO' ? '#38BDF8' : (b.tipo === 'MONEDAS' ? '#F59E0B' : '#A855F7');
+            const colBrillo = b.tipo === 'TIEMPO' ? 'rgba(56, 189, 248, 0.4)' : (b.tipo === 'MONEDAS' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(168, 85, 247, 0.4)');
+
+            // Brillo exterior de la burbuja
+            ctx.shadowColor = colBorde;
+            ctx.shadowBlur = 12;
+
+            // Cuerpo esférico translúcido con gradiente
+            const grad = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, 3, cx, cy, r);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+            grad.addColorStop(0.4, colBrillo);
+            grad.addColorStop(0.85, 'rgba(255, 255, 255, 0.2)');
+            grad.addColorStop(1, colBorde);
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Reflejo especular brillante de burbuja
+            ctx.shadowColor = 'transparent';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(cx - r * 0.38, cy - r * 0.38, r * 0.3, r * 0.16, -0.65, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ícono vectorial centrado según el tipo de bonus
+            ctx.save();
+            ctx.translate(cx, cy);
+            if (b.tipo === 'TIEMPO') {
+                // Reloj / cronómetro cyan
+                ctx.fillStyle = '#0284C7';
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -6);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(4, 0);
+                ctx.stroke();
+            } else if (b.tipo === 'MONEDAS') {
+                // Moneda dorada con brillo
+                ctx.fillStyle = '#D97706';
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#FDE047';
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#92400E';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', 0, 0);
+            } else if (b.tipo === 'FRENESI') {
+                // Rayo reluciente púrpura
+                ctx.fillStyle = '#7E22CE';
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#FDE047';
+                ctx.beginPath();
+                ctx.moveTo(1, -7);
+                ctx.lineTo(-4, 0);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(-2, 7);
+                ctx.lineTo(5, -1);
+                ctx.lineTo(1, -1);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+
+            ctx.restore();
+        }
+    }
+
+    dibujarTextosFlotantes(ctx) {
+        for (const t of this.textosFlotantes) {
+            ctx.save();
+            const progreso = t.tiempo / t.duracion;
+            const alfa = Math.max(0, 1 - progreso);
+            const escala = t.escala * (1.0 + Math.sin(Math.min(1, t.tiempo * 6) * Math.PI * 0.5) * 0.25);
+
+            ctx.globalAlpha = alfa;
+            ctx.translate(t.x, t.y);
+            ctx.scale(escala, escala);
+
+            ctx.font = '900 16px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const metrics = ctx.measureText(t.texto);
+            const pw = metrics.width + 22;
+            const ph = 26;
+
+            // Pastilla estilizada tipo sticker de videojuego
+            ctx.fillStyle = '#0F172A';
+            ctx.beginPath();
+            ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 13);
+            ctx.fill();
+
+            ctx.strokeStyle = t.color;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Texto con color vibrante
+            ctx.fillStyle = t.color;
+            ctx.fillText(t.texto, 0, 0);
+
+            ctx.restore();
+        }
+    }
+
+    dibujarMascota(ctx) {
+        // Chaski el Huerequeque (Mascota de la fauna de Ica)
+        const mx = this.ESC_DER - 58;
+        const my = this.ESC_ABA - 46;
+        const respiracion = Math.sin(this.relojTotal * 4.5) * 2;
+        const cy = my + respiracion;
+
+        ctx.save();
+
+        // Sombrilla / sombra en el suelo
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        ctx.beginPath();
+        ctx.ellipse(mx, my + 38, 18, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Patitas de ave (largas y ágiles)
+        ctx.strokeStyle = '#D97706';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(mx - 5, cy + 18);
+        ctx.lineTo(mx - 7, my + 38);
+        ctx.moveTo(mx + 5, cy + 18);
+        ctx.lineTo(mx + 7, my + 38);
+        ctx.stroke();
+
+        // Cuerpo esponjoso del huerequeque (color tierra / beige costeño)
+        ctx.fillStyle = '#D6C7A1';
+        ctx.beginPath();
+        ctx.ellipse(mx, cy + 6, 17, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2A2340';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        // Pecho crema
+        ctx.fillStyle = '#FBF8EE';
+        ctx.beginPath();
+        ctx.ellipse(mx - 4, cy + 8, 9, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ala jaspeada con plumas
+        ctx.fillStyle = '#9C8861';
+        ctx.beginPath();
+        ctx.ellipse(mx + 6, cy + 5, 8, 11, 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2A2340';
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+
+        // Cabeza redonda
+        ctx.fillStyle = '#E5D8B8';
+        ctx.beginPath();
+        ctx.arc(mx - 4, cy - 12, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2A2340';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        // Pañuelo ecológico verde scout al cuello
+        ctx.fillStyle = '#10B981';
+        ctx.beginPath();
+        ctx.moveTo(mx - 10, cy - 2);
+        ctx.lineTo(mx + 3, cy - 2);
+        ctx.lineTo(mx - 3, cy + 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#065F46';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Ojo grande expresivo característico del huerequeque
+        ctx.fillStyle = '#F59E0B'; // Amarillo intenso
+        ctx.beginPath();
+        ctx.arc(mx - 9, cy - 13, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1E1B2E'; // Pupila
+        ctx.beginPath();
+        ctx.arc(mx - 10, cy - 13, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF'; // Brillo
+        ctx.beginPath();
+        ctx.arc(mx - 11, cy - 15, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pico puntiagudo
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath();
+        ctx.moveTo(mx - 15, cy - 14);
+        ctx.lineTo(mx - 24, cy - 11);
+        ctx.lineTo(mx - 15, cy - 9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#B45309';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Nombre de la mascota en etiqueta debajo
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.beginPath();
+        ctx.roundRect(mx - 24, my + 41, 48, 14, 6);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 9px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('CHASKI', mx, my + 48);
+
+        // Globo de diálogo si la mascota tiene un mensaje activo
+        if (this.mascotaMensaje) {
+            const txt = this.mascotaMensaje.texto;
+            ctx.font = 'bold 12.5px "Segoe UI", system-ui, sans-serif';
+            const m = ctx.measureText(txt);
+            const bw = Math.min(230, m.width + 24);
+            const bh = 38;
+            const bx = mx - bw - 10;
+            const by = cy - 36;
+
+            // Sombra del globo
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.roundRect(bx, by + 2, bw, bh, 12);
+            ctx.fill();
+
+            // Fondo blanco del globo
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.roundRect(bx, by, bw, bh, 12);
+            ctx.fill();
+            ctx.strokeStyle = '#2A2340';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Rabillo del globo apuntando al pico de Chaski
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.moveTo(bx + bw - 2, by + bh - 12);
+            ctx.lineTo(bx + bw + 10, cy - 10);
+            ctx.lineTo(bx + bw - 6, by + bh - 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#2A2340';
+            ctx.lineWidth = 2.2;
+            ctx.stroke();
+
+            // Texto dentro del globo
+            ctx.fillStyle = '#1E293B';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(txt, bx + bw / 2, by + bh / 2, bw - 16);
         }
 
         ctx.restore();
@@ -1330,12 +1851,28 @@ class MinijuegoBase {
         ctx.textBaseline = 'middle';
         ctx.fillText(this.gano ? '¡MISIÓN CUMPLIDA!' : 'MISIÓN NO COMPLETADA', x + w / 2, y + 42);
 
-        // Estrellas animadas dibujadas vectorialmente
+        // Estrellas animadas dibujadas vectorialmente con impacto escalonado
         const yEstrellas = y + 125;
         for (let i = 1; i <= 3; i++) {
             const xStar = x + w / 2 + (i - 2) * 65;
             const tiene = i <= this.estrellasNivel;
-            this.dibujarEstrellaForma(ctx, xStar, yEstrellas, 24, tiene ? '#FFD84D' : '#CBD5E1', '#2A2340');
+            const delay = (i - 1) * 0.38 + 0.15;
+            let scaleStar = 1.0;
+            let activa = false;
+
+            if (this.gano && tiene) {
+                if (this.tiempoEnVictoria >= delay) {
+                    activa = true;
+                    const t = Math.min(1, (this.tiempoEnVictoria - delay) * 4);
+                    scaleStar = t < 1 ? (1.5 - 0.5 * t + Math.sin(t * Math.PI) * 0.35) : 1.0;
+                }
+            }
+
+            ctx.save();
+            ctx.translate(xStar, yEstrellas);
+            ctx.scale(scaleStar, scaleStar);
+            this.dibujarEstrellaForma(ctx, 0, 0, 24, activa ? '#FFD84D' : '#CBD5E1', '#2A2340');
+            ctx.restore();
         }
 
         // Estadísticas
@@ -1356,7 +1893,7 @@ class MinijuegoBase {
         ctx.fillText(`• Tiempo empleado: ${formatearTiempo(this.tiempoJuego)}`, x + 65, yStats + 60);
         ctx.fillText(`• Aciertos: ${this.aciertos}   |   Errores: ${this.errores}`, x + 65, yStats + 90);
 
-        // Impacto social y monedas ganadas
+        // Impacto social y monedas ganadas con contador animado
         const factorAcierto = this.tipo.impactoPorAcierto || 0;
         const factorNivel = this.tipo.impactoPorNivel || 0;
         const imp = (this.aciertos * factorAcierto) + (this.gano ? factorNivel : 0);
@@ -1366,7 +1903,9 @@ class MinijuegoBase {
 
         ctx.fillStyle = '#D97706';
         ctx.textAlign = 'right';
-        const mon = this.recompensa ? this.recompensa.monedasGanadas : 0;
+        const totalMonedas = this.recompensa ? this.recompensa.monedasGanadas : 0;
+        const rollMon = Math.min(1, this.tiempoEnVictoria / 1.1);
+        const mon = Math.round(totalMonedas * rollMon);
         ctx.fillText(`+${mon} EcoMonedas`, x + w - 65, yStats + 30);
 
         // Medallas desbloqueadas si hubo
@@ -1384,7 +1923,12 @@ class MinijuegoBase {
         this.dibujarBoton(ctx, x + 250, yBtns, 180, 48, 'Niveles', '#2D1B69', '#FFFFFF', 16);
 
         if (this.gano && this.nivelNumero < 10) {
-            this.dibujarBoton(ctx, x + 460, yBtns, 180, 48, 'Siguiente Misión ▶', '#2E9455', '#FFFFFF', 16);
+            const pulsoBtn = 1.0 + Math.sin(this.relojTotal * 6) * 0.035;
+            ctx.save();
+            ctx.translate(x + 550, yBtns + 24);
+            ctx.scale(pulsoBtn, pulsoBtn);
+            this.dibujarBoton(ctx, -90, -24, 180, 48, 'Siguiente Misión ▶', '#2E9455', '#FFFFFF', 16);
+            ctx.restore();
         }
     }
 
@@ -1576,6 +2120,14 @@ class MinijuegoBase {
 
         // 7. Clics en la escena de juego
         if (this.estado === 'JUGANDO') {
+            // Revisar si se tocó alguna Eco-Burbuja flotante de bonificación
+            for (let i = this.ecoBurbujas.length - 1; i >= 0; i--) {
+                const b = this.ecoBurbujas[i];
+                if (Math.hypot(x - b.x, y - b.y) <= b.radio + 14) {
+                    this.explotarEcoBurbuja(b, i);
+                    return;
+                }
+            }
             this.alPresionar(x, y);
         }
     }
