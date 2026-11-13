@@ -1,0 +1,880 @@
+/* ============================================================
+   OperaciÃ³n EcoRescate - Estilo Visual Caricatura Vectorial
+   DiseÃ±o editorial limpio, con contornos nÃ­tidos y sin emojis
+   ============================================================ */
+
+:root {
+    --color-fondo: #EFEEFC;
+    --color-trazo: #2A2340;
+    --color-morado: #2D1B69;
+    --color-morado-suave: #4B3F8A;
+    --color-violeta: #7C4DFF;
+    --color-amarillo: #FFD84D;
+    --color-menta: #6EE7B7;
+    --color-rojo: #FF6B6B;
+    --color-blanco: #FFFFFF;
+
+    --juego-limpieza: #23786A;
+    --juego-agua: #2E80A8;
+    --juego-energia: #DFA855;
+    --juego-verde: #4E9A45;
+
+    --sombra-cartoon: 0 6px 0 var(--color-trazo);
+    --sombra-cartoon-sm: 0 4px 0 var(--color-trazo);
+    --sombra-cartoon-lg: 0 8px 0 var(--color-trazo);
+    --borde-cartoon: 3.5px solid var(--color-trazo);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Nunito', 'Fredoka', Roboto, sans-serif;
+    background-color: var(--color-fondo);
+    background-image: 
+        radial-gradient(#D6D2F7 12%, transparent 12%),
+        radial-gradient(#D6D2F7 12%, transparent 12%);
+    background-size: 32px 32px;
+    background-position: 0 0, 16px 16px;
+    color: var(--color-trazo);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Ãconos vectoriales SVG */
+.icono-svg {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.icono-svg-lg {
+    width: 32px;
+    height: 32px;
+}
+
+.icono-svg-xl {
+    width: 44px;
+    height: 44px;
+}
+
+/* ---------------- HEADER SUPERIOR ---------------- */
+.header-eco {
+    background: #FFFFFF;
+    border-bottom: var(--borde-cartoon);
+    box-shadow: 0 4px 0 rgba(42, 35, 64, 0.08);
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-grupo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.logo-badge {
+    width: 44px;
+    height: 44px;
+    background: #23786A;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    box-shadow: 0 3px 0 var(--color-trazo);
+}
+
+.logo-texto h1 {
+    font-size: 21px;
+    font-weight: 900;
+    color: var(--color-morado);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.logo-texto span {
+    font-size: 11px;
+    font-weight: 800;
+    color: #059669;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-controles {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pill-perfil {
+    background: #F1F5F9;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 24px;
+    padding: 4px 14px 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, background-color 0.15s;
+}
+
+.pill-perfil:hover {
+    background: #E2E8F0;
+    transform: translateY(-2px);
+}
+
+.avatar-mini {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #FFD84D;
+    border: 2px solid var(--color-trazo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-trazo);
+}
+
+.perfil-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.perfil-nombre {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--color-morado);
+}
+
+.perfil-grado {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+}
+
+.indicador-eco {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 20px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 900;
+    font-size: 14px;
+    box-shadow: 0 3px 0 var(--color-trazo);
+}
+
+.indicador-eco.monedas {
+    color: #D97706;
+}
+
+.indicador-eco.estrellas {
+    color: #EAB308;
+}
+
+.btn-icono {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-morado);
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--color-trazo);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-icono:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--color-trazo);
+}
+
+.btn-icono:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-trazo);
+}
+
+/* ---------------- CONTENEDOR PRINCIPAL ---------------- */
+.contenedor-app {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ---------------- PANTALLA MENÃš PRINCIPAL ---------------- */
+.pantalla-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.banner-bienvenida {
+    background: linear-gradient(135deg, #7C4DFF, #2D1B69);
+    border: var(--borde-cartoon);
+    border-radius: 24px;
+    padding: 24px 32px;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--sombra-cartoon-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.banner-bienvenida h2 {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.banner-bienvenida p {
+    font-size: 15px;
+    max-width: 720px;
+    opacity: 0.95;
+    line-height: 1.45;
+}
+
+/* CuadrÃ­cula de 4 Tarjetas de Minijuegos */
+.grid-juegos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+.tarjeta-juego {
+    background: #FFFFFF;
+    border: var(--borde-cartoon);
+    border-radius: 24px;
+    box-shadow: var(--sombra-cartoon-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.tarjeta-juego:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 0 var(--color-trazo);
+}
+
+.tarjeta-juego:active {
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 var(--color-trazo);
+}
+
+.tarjeta-encabezado {
+    border-radius: 16px;
+    padding: 16px;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    border: 2.5px solid var(--color-trazo);
+}
+
+.tarjeta-icono-caja {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+}
+
+.tarjeta-titulos h3 {
+    font-size: 19px;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.tarjeta-titulos span {
+    font-size: 11px;
+    font-weight: 800;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+}
+
+.tarjeta-desc {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.45;
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.tarjeta-progreso {
+    background: #F8FAFC;
+    border: 2px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.progreso-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.barra-progreso-bg {
+    background: #E2E8F0;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.barra-progreso-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s;
+}
+
+.btn-jugar-tarjeta {
+    background: var(--color-amarillo);
+    color: var(--color-trazo);
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 16px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 900;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--color-trazo);
+    transition: transform 0.1s;
+    letter-spacing: 0.5px;
+}
+
+.tarjeta-juego:hover .btn-jugar-tarjeta {
+    background: #FFE066;
+}
+
+/* Colores temÃ¡ticos */
+.tarjeta-juego[data-juego="LIMPIEZA"] .tarjeta-encabezado {
+    background: linear-gradient(135deg, #2BB198, #23786A);
+}
+.tarjeta-juego[data-juego="LIMPIEZA"] .barra-progreso-fill {
+    background: #23786A;
+}
+
+.tarjeta-juego[data-juego="AGUA"] .tarjeta-encabezado {
+    background: linear-gradient(135deg, #3FA5D9, #2E80A8);
+}
+.tarjeta-juego[data-juego="AGUA"] .barra-progreso-fill {
+    background: #2E80A8;
+}
+
+.tarjeta-juego[data-juego="ENERGIA"] .tarjeta-encabezado {
+    background: linear-gradient(135deg, #F4B848, #DFA855);
+}
+.tarjeta-juego[data-juego="ENERGIA"] .barra-progreso-fill {
+    background: #DFA855;
+}
+
+.tarjeta-juego[data-juego="VERDE"] .tarjeta-encabezado {
+    background: linear-gradient(135deg, #62BE55, #4E9A45);
+}
+.tarjeta-juego[data-juego="VERDE"] .barra-progreso-fill {
+    background: #4E9A45;
+}
+
+/* Barra de accesos directos */
+.menu-accesos-rapidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.btn-acceso {
+    background: #FFFFFF;
+    border: var(--borde-cartoon);
+    border-radius: 18px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-morado);
+    box-shadow: var(--sombra-cartoon);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-acceso:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 var(--color-trazo);
+}
+
+.btn-acceso:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--color-trazo);
+}
+
+/* ---------------- PANTALLA MAPA DE NIVELES ---------------- */
+.pantalla-mapa {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mapa-cabecera {
+    background: #FFFFFF;
+    border: var(--borde-cartoon);
+    border-radius: 24px;
+    padding: 18px 24px;
+    box-shadow: var(--sombra-cartoon-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mapa-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mapa-badge-icono {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--color-morado);
+    border: 2.5px solid var(--color-trazo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+}
+
+.mapa-titulos h2 {
+    font-size: 23px;
+    font-weight: 900;
+    color: var(--color-morado);
+}
+
+.mapa-titulos p {
+    font-size: 13.5px;
+    color: #64748B;
+    font-weight: 700;
+}
+
+.grid-niveles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+}
+
+.boton-nivel {
+    background: #FFFFFF;
+    border: var(--borde-cartoon);
+    border-radius: 20px;
+    padding: 18px 12px;
+    box-shadow: var(--sombra-cartoon);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+}
+
+.boton-nivel:not(.bloqueado):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 0 var(--color-trazo);
+    background: #FFFDE7;
+}
+
+.boton-nivel:not(.bloqueado):active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--color-trazo);
+}
+
+.boton-nivel.bloqueado {
+    background: #E2E8F0;
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: 0 3px 0 #94A3B8;
+}
+
+.nivel-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-morado);
+    color: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.boton-nivel.bloqueado .nivel-num {
+    background: #94A3B8;
+}
+
+.nivel-titulo {
+    font-size: 13.5px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--color-trazo);
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+.nivel-estrellas-contenedor {
+    display: flex;
+    gap: 3px;
+    color: #EAB308;
+}
+
+.candado-bloqueo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: #64748B;
+}
+
+/* ---------------- PANTALLA DE JUEGO (CANVAS) ---------------- */
+.pantalla-juego {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex: 1;
+}
+
+.lienzo-contenedor {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    aspect-ratio: 1000 / 640;
+    border: var(--borde-cartoon);
+    border-radius: 24px;
+    box-shadow: var(--sombra-cartoon-lg);
+    background: #1E1B2E;
+    overflow: hidden;
+}
+
+canvas#lienzoJuego {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ---------------- MODALES Y DIÃLOGOS ---------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(42, 35, 64, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.modal-overlay.activo {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-caja {
+    background: #FFFFFF;
+    border: var(--borde-cartoon);
+    border-radius: 28px;
+    box-shadow: 0 16px 0 var(--color-trazo);
+    width: 100%;
+    max-width: 580px;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.2s;
+}
+
+.modal-overlay.activo .modal-caja {
+    transform: scale(1);
+}
+
+.modal-cabecera {
+    background: var(--color-morado);
+    color: #FFFFFF;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--borde-cartoon);
+}
+
+.modal-cabecera h3 {
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.btn-cerrar-modal {
+    background: #FF6B6B;
+    border: 2px solid var(--color-trazo);
+    border-radius: 12px;
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+    color: #FFFFFF;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 2px 0 var(--color-trazo);
+}
+
+.modal-cuerpo {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Formularios */
+.campo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-form label {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-trazo);
+}
+
+.campo-form input,
+.campo-form select {
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-trazo);
+    outline: none;
+    background: #F8FAFC;
+}
+
+.campo-form input:focus,
+.campo-form select:focus {
+    background: #FFFFFF;
+    border-color: var(--color-violeta);
+}
+
+.btn-principal {
+    background: var(--color-amarillo);
+    color: var(--color-trazo);
+    border: var(--borde-cartoon);
+    border-radius: 18px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: var(--sombra-cartoon);
+    text-align: center;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-principal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--color-trazo);
+}
+
+.btn-principal:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--color-trazo);
+}
+
+/* Tablas y distintivos */
+.puesto-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    border: 1.5px solid var(--color-trazo);
+    color: #FFFFFF;
+}
+
+.puesto-1 { background: #EAB308; color: #1E1B2E; }
+.puesto-2 { background: #94A3B8; color: #1E1B2E; }
+.puesto-3 { background: #D97706; }
+.puesto-otro { background: #F1F5F9; color: #475569; }
+
+.input-eco {
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-trazo);
+    background: #FFFFFF;
+    outline: none;
+    cursor: pointer;
+}
+
+.input-eco:focus {
+    border-color: var(--color-violeta);
+}
+
+/* ---------------- TIENDA DE PERSONALIZACIÓN Y ACCESORIOS ---------------- */
+.tarjeta-tienda-item {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 18px;
+    padding: 12px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 0 var(--color-trazo);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    user-select: none;
+    position: relative;
+}
+
+.tarjeta-tienda-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 0 var(--color-trazo);
+    border-color: #7C4DFF;
+}
+
+.tarjeta-tienda-item.activa-preview {
+    border-color: #7C4DFF;
+    background: #F5F3FF;
+    box-shadow: 0 6px 0 #7C4DFF;
+}
+
+.tarjeta-tienda-item.equipada {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+    box-shadow: 0 4px 0 #3B82F6;
+}
+
+.caja-canvas-preview {
+    background: #F8FAFC;
+    border: 2px solid var(--color-trazo);
+    border-radius: 14px;
+    padding: 3px;
+    box-shadow: inset 0 2px 4px rgba(42, 35, 64, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+}
+
+.tarjeta-tienda-item:hover .caja-canvas-preview {
+    transform: scale(1.04);
+}
+
+.badge-item-tienda {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 9.5px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-trazo);
+}
+
+.badge-item-tienda.en-uso {
+    background: #10B981;
+    color: #FFFFFF;
+}
+
+.badge-item-tienda.adquirido {
+    background: #6EE7B7;
+    color: #064E3B;
+}
+
+/* ---------------- RESPONSIVIDAD PARA CELULAR ---------------- */
+@media (max-width: 850px) {
+    .header-eco {
+        padding: 8px 12px;
+    }
+
+    .logo-texto h1 {
+        font-size: 17px;
+    }
+
+    .perfil-grado {
+        display: none;
+    }
+
+    .grid-niveles {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .contenedor-app {
+        padding: 12px;
+    }
+
+    .banner-bienvenida {
+        padding: 18px 20px;
+    }
+
+    .banner-bienvenida h2 {
+        font-size: 21px;
+    }
+
+    #tiendaContenedorAccesorios {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    #tiendaContenedorPolos {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Operación EcoRescate - Videojuego Educativo Ambiental</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Encabezado Superior -->
+    <header class="header-eco">
+        <div class="logo-grupo" id="btnLogoInicio" title="Ir al menú principal">
+            <div class="logo-badge">
+                <svg class="icono-svg" viewBox="0 0 24 24">
+                    <path d="M12 3C7 3 3 8 3 13c0 4.5 3.5 8 8 8 1 0 2-.2 3-.5 3-1 6-4 7-8.5.5-2.5-.5-5-2-6.5-1.5-1.5-4-2.5-7-2.5zm0 16c-3.3 0-6-2.7-6-6 0-3.5 3-7 6-7 3.5 0 6 3.5 6 7 0 3.3-2.7 6-6 6zm1-10c0 1.7-1.3 3-3 3v2c2.8 0 5-2.2 5-5h-2z"/>
+                </svg>
+            </div>
+            <div class="logo-texto">
+                <h1>Operación EcoRescate</h1>
+                <span>Ica, Perú • Cuidado del Medio Ambiente</span>
+            </div>
+        </div>
+
+        <div class="header-controles">
+            <!-- Píldora de Perfil del Estudiante -->
+            <div class="pill-perfil" id="btnCambiarPerfil" title="Cambiar estudiante o editar perfil">
+                <div class="avatar-mini" id="avatarIcono">
+                    <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V21h19.2v-1.8c0-3.2-6.4-4.8-9.6-4.8z"/>
+                    </svg>
+                </div>
+                <div class="perfil-info">
+                    <span class="perfil-nombre" id="headerNombre">Cargando...</span>
+                    <span class="perfil-grado" id="headerGrado">1° Primaria</span>
+                </div>
+            </div>
+
+            <!-- EcoMonedas -->
+            <div class="indicador-eco monedas" title="EcoMonedas acumuladas">
+                <svg class="icono-svg" viewBox="0 0 24 24" style="color: #D97706;">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                    <circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M12 8v8M9.5 10.5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span id="headerMonedas">0</span>
+            </div>
+
+            <!-- Estrellas Totales -->
+            <div class="indicador-eco estrellas" title="Estrellas obtenidas">
+                <svg class="icono-svg" viewBox="0 0 24 24" style="color: #EAB308;">
+                    <polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.7 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="currentColor" stroke="#2A2340" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                <span id="headerEstrellas">0/120</span>
+            </div>
+
+            <!-- Alternar Sonido -->
+            <button class="btn-icono" id="btnSonidoToggle" title="Activar o silenciar sonido">
+                <svg class="icono-svg" id="svgSonidoIcono" viewBox="0 0 24 24">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.8-1-3.3-2.5-4v8c1.5-.7 2.5-2.2 2.5-4zM14 3.2v2.1c2.9.9 5 3.5 5 6.7s-2.1 5.8-5 6.7v2.1c4-.9 7-4.5 7-8.8s-3-7.9-7-8.8z"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal de Vistas -->
+    <main class="contenedor-app">
+
+        <!-- 1. PANTALLA MENÚ PRINCIPAL -->
+        <section class="pantalla-menu" id="vistaMenu">
+            <div class="banner-bienvenida">
+                <div>
+                    <h2>Misiones de Cuidado Ambiental</h2>
+                    <p>
+                        Aprende a proteger nuestro entorno en Ica: clasifica residuos en la plaza, ahorra agua en los lavaderos, usa eficientemente la energía en las aulas y haz florecer el biohuerto escolar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 4 Tarjetas de Minijuegos -->
+            <div class="grid-juegos">
+                <!-- 1. Limpieza Monstruosa -->
+                <article class="tarjeta-juego" data-juego="LIMPIEZA" id="tarjetaLimpieza">
+                    <div class="tarjeta-encabezado">
+                        <div class="tarjeta-icono-caja">
+                            <svg class="icono-svg icono-svg-lg" viewBox="0 0 24 24">
+                                <path d="M7 19c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V7H7v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </div>
+                        <div class="tarjeta-titulos">
+                            <h3>Limpieza Monstruosa</h3>
+                            <span>LA PLAZA DE ARMAS</span>
+                        </div>
+                    </div>
+                    <p class="tarjeta-desc">
+                        Recoge los residuos en la plaza y llévalos a su tacho de plástico, papel o metal. Evita el lodo tóxico y mantén limpia la ciudad.
+                    </p>
+                    <div class="tarjeta-progreso">
+                        <div class="progreso-fila">
+                            <span>Progreso:</span>
+                            <span id="progresoTextoLimpieza">0 / 10 niveles</span>
+                        </div>
+                        <div class="barra-progreso-bg">
+                            <div class="barra-progreso-fill" id="barraLimpieza" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="btn-jugar-tarjeta">INICIAR MISIÓN</div>
+                </article>
+
+                <!-- 2. Guardián del Agua -->
+                <article class="tarjeta-juego" data-juego="AGUA" id="tarjetaAgua">
+                    <div class="tarjeta-encabezado">
+                        <div class="tarjeta-icono-caja">
+                            <svg class="icono-svg icono-svg-lg" viewBox="0 0 24 24">
+                                <path d="M12 2.7C10.5 4.8 6 11.2 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-3.8-4.5-10.2-6-12.3zm0 16.3c-2.2 0-4-1.8-4-4 0-2.3 2.7-6.8 4-8.8 1.3 2 4 6.5 4 8.8 0 2.2-1.8 4-4 4z"/>
+                            </svg>
+                        </div>
+                        <div class="tarjeta-titulos">
+                            <h3>Guardián del Agua</h3>
+                            <span>LAVADEROS ESCOLARES</span>
+                        </div>
+                    </div>
+                    <p class="tarjeta-desc">
+                        Cierra caños desatendidos o con fuga y los de alumnos en cepillado. Permite el enjuague de quienes sí necesitan el agua.
+                    </p>
+                    <div class="tarjeta-progreso">
+                        <div class="progreso-fila">
+                            <span>Progreso:</span>
+                            <span id="progresoTextoAgua">0 / 10 niveles</span>
+                        </div>
+                        <div class="barra-progreso-bg">
+                            <div class="barra-progreso-fill" id="barraAgua" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="btn-jugar-tarjeta">INICIAR MISIÓN</div>
+                </article>
+
+                <!-- 3. Apaga y Ahorra -->
+                <article class="tarjeta-juego" data-juego="ENERGIA" id="tarjetaEnergia">
+                    <div class="tarjeta-encabezado">
+                        <div class="tarjeta-icono-caja">
+                            <svg class="icono-svg icono-svg-lg" viewBox="0 0 24 24">
+                                <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6C7.8 13.16 7 11.18 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.18-.8 4.16-2.15 5.1z"/>
+                            </svg>
+                        </div>
+                        <div class="tarjeta-titulos">
+                            <h3>Apaga y Ahorra</h3>
+                            <span>AULAS Y PABELLONES</span>
+                        </div>
+                    </div>
+                    <p class="tarjeta-desc">
+                        Desconecta luces y pantallas en aulas desocupadas y retira cargadores solos para combatir el consumo fantasma.
+                    </p>
+                    <div class="tarjeta-progreso">
+                        <div class="progreso-fila">
+                            <span>Progreso:</span>
+                            <span id="progresoTextoEnergia">0 / 10 niveles</span>
+                        </div>
+                        <div class="barra-progreso-bg">
+                            <div class="barra-progreso-fill" id="barraEnergia" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="btn-jugar-tarjeta">INICIAR MISIÓN</div>
+                </article>
+
+                <!-- 4. Sembradores del Verde -->
+                <article class="tarjeta-juego" data-juego="VERDE" id="tarjetaVerde">
+                    <div class="tarjeta-encabezado">
+                        <div class="tarjeta-icono-caja">
+                            <svg class="icono-svg icono-svg-lg" viewBox="0 0 24 24">
+                                <path d="M12 2C8 6 4 9 4 14c0 4.4 3.6 8 8 8s8-3.6 8-8c0-5-4-8-8-12zm0 18c-3.3 0-6-2.7-6-6 0-3.5 2.7-6.5 6-9.8 3.3 3.3 6 6.3 6 9.8 0 3.3-2.7 6-6 6zm-1-10c0 1.7-1.3 3-3 3v2c2.8 0 5-2.2 5-5h-2z"/>
+                            </svg>
+                        </div>
+                        <div class="tarjeta-titulos">
+                            <h3>Sembradores del Verde</h3>
+                            <span>EL BIOHUERTO ESCOLAR</span>
+                        </div>
+                    </div>
+                    <p class="tarjeta-desc">
+                        Siembra semillas, aplica agua únicamente cuando la tierra esté seca y mantén los bancales libres de residuos.
+                    </p>
+                    <div class="tarjeta-progreso">
+                        <div class="progreso-fila">
+                            <span>Progreso:</span>
+                            <span id="progresoTextoVerde">0 / 10 niveles</span>
+                        </div>
+                        <div class="barra-progreso-bg">
+                            <div class="barra-progreso-fill" id="barraVerde" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="btn-jugar-tarjeta">INICIAR MISIÓN</div>
+                </article>
+            </div>
+
+            <!-- Accesos directos de la Suite -->
+            <div class="menu-accesos-rapidos">
+                <button class="btn-acceso" id="btnAbrirTienda">
+                    <svg class="icono-svg" viewBox="0 0 24 24">
+                        <path d="M19 6h-2c0-2.8-2.2-5-5-5S7 3.2 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.7 0 3 1.3 3 3H9c0-1.7 1.3-3 3-3zm7 17H5V8h14v12z"/>
+                    </svg>
+                    Tienda de Accesorios
+                </button>
+                <button class="btn-acceso" id="btnAbrirMedallas">
+                    <svg class="icono-svg" viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8.5 13L6 22l6-3 6 3-2.5-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    14 Medallas
+                </button>
+                <button class="btn-acceso" id="btnAbrirRanking">
+                    <svg class="icono-svg" viewBox="0 0 24 24">
+                        <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.8 2.2 5 5 5h.4c.8 1.7 2.3 3 4.1 3.4V19H9v2h6v-2h-3.5v-2.6c1.8-.4 3.3-1.7 4.1-3.4H16c2.8 0 5-2.2 5-5V7c0-1.1-.9-2-2-2zM5 8V7h2v3c-1.1 0-2-.9-2-2zm14 0c0 1.1-.9 2-2 2V7h2v1z"/>
+                    </svg>
+                    Ranking del Salón
+                </button>
+                <button class="btn-acceso" id="btnAbrirImpacto">
+                    <svg class="icono-svg" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20" fill="none" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Impacto Social
+                </button>
+                <button class="btn-acceso" id="btnExportarCSV">
+                    <svg class="icono-svg" viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Exportar Partidas (CSV)
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. PANTALLA MAPA DE 10 NIVELES -->
+        <section class="pantalla-mapa" id="vistaMapa" style="display: none;">
+            <div class="mapa-cabecera">
+                <div class="mapa-info">
+                    <div class="mapa-badge-icono" id="mapaIconoBadge">
+                        <svg class="icono-svg icono-svg-lg" viewBox="0 0 24 24">
+                            <path d="M7 19c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V7H7v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </div>
+                    <div class="mapa-titulos">
+                        <h2 id="mapaTitulo">Limpieza Monstruosa</h2>
+                        <p id="mapaSubtitulo">Supera cada nivel para desbloquear la siguiente misión</p>
+                    </div>
+                </div>
+                <button class="btn-acceso" id="btnVolverAlMenu">
+                    Volver al Menú
+                </button>
+            </div>
+
+            <!-- Rejilla de los 10 Niveles -->
+            <div class="grid-niveles" id="contenedorBotonesNiveles">
+                <!-- Se generan dinámicamente con JS -->
+            </div>
+        </section>
+
+        <!-- 3. PANTALLA LIENZO DE JUEGO (CANVAS 1000x640) -->
+        <section class="pantalla-juego" id="vistaJuego" style="display: none;">
+            <div class="lienzo-contenedor">
+                <canvas id="lienzoJuego" width="1000" height="640"></canvas>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODALES ==================== -->
+
+    <!-- Modal 1: Registro / Selección de Estudiante -->
+    <div class="modal-overlay" id="modalRegistro">
+        <div class="modal-caja">
+            <div class="modal-cabecera">
+                <h3>Ficha del Estudiante</h3>
+            </div>
+            <div class="modal-cuerpo">
+                <p style="font-size: 14.5px; color: #475569; font-weight: 600; line-height: 1.45;">
+                    Ingresa tus datos escolares para llevar el registro de tus niveles superados, estrellas obtenidas, medallas y EcoMonedas.
+                </p>
+                <form id="formRegistroEstudiante" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="campo-form">
+                        <label for="inputNombre">Nombre y apellido del alumno:</label>
+                        <input type="text" id="inputNombre" placeholder="Ejemplo: Mateo Quispe" required autocomplete="name">
+                    </div>
+                    <div style="display: flex; gap: 14px;">
+                        <div class="campo-form" style="flex: 1;">
+                            <label for="selectGrado">Grado:</label>
+                            <select id="selectGrado">
+                                <option value="1">1° Primaria</option>
+                                <option value="2">2° Primaria</option>
+                                <option value="3">3° Primaria</option>
+                                <option value="4">4° Primaria</option>
+                                <option value="5" selected>5° Primaria</option>
+                                <option value="6">6° Primaria</option>
+                            </select>
+                        </div>
+                        <div class="campo-form" style="flex: 1;">
+                            <label for="selectSeccion">Sección:</label>
+                            <select id="selectSeccion">
+                                <option value="A" selected>Sección A</option>
+                                <option value="B">Sección B</option>
+                                <option value="C">Sección C</option>
+                                <option value="D">Sección D</option>
+                                <option value="UNICA">Única</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-principal" style="margin-top: 8px;">
+                        Comenzar Misión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Tienda de Accesorios y Polos -->
+    <div class="modal-overlay" id="modalTienda">
+        <div class="modal-caja" style="max-width: 820px; width: 95%;">
+            <div class="modal-cabecera">
+                <h3>Tienda de Personalización</h3>
+                <button class="btn-cerrar-modal" id="btnCerrarTienda">✕</button>
+            </div>
+            <div class="modal-cuerpo" style="max-height: 84vh; overflow-y: auto; padding: 20px;">
+                <!-- Tarjeta de Presentación del Avatar -->
+                <div style="display: flex; gap: 18px; align-items: center; background: #F8FAFC; border: 2.5px solid var(--color-trazo); border-radius: 18px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div style="text-align: center;">
+                        <canvas id="canvasAvatarTienda" width="120" height="120" style="background: #FFFFFF; border: 2.5px solid var(--color-trazo); border-radius: 16px; box-shadow: 0 4px 0 var(--color-trazo);"></canvas>
+                        <div id="lblAvatarTienda" style="font-size: 11px; font-weight: 800; color: #64748B; margin-top: 5px; transition: color 0.15s ease;">TU ECO-HÉROE</div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-weight: 800; color: #475569; font-size: 14px;">Tus EcoMonedas:</span>
+                            <div class="indicador-eco monedas">
+                                <svg class="icono-svg" viewBox="0 0 24 24" style="color: #D97706;">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 7v10M9 10h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span id="tiendaMonedas">0</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; color: #64748B; font-weight: 600; line-height: 1.4;">
+                            Gana EcoMonedas superando niveles y respondiendo los Desafíos del Saber para equipar accesorios y cambiar el color de tu polo escolar.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Pestañas de la Tienda -->
+                <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+                    <button id="btnTabAccesorios" class="btn-principal" style="padding: 8px 16px; font-size: 13px; background: #7C4DFF; color: white;">
+                        Accesorios (8)
+                    </button>
+                    <button id="btnTabPolos" class="btn-principal" style="padding: 8px 16px; font-size: 13px; background: #F1F5F9; color: var(--color-trazo);">
+                        Colores de Polo (6)
+                    </button>
+                </div>
+
+                <div id="tiendaContenedorAccesorios" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    <!-- Se llena dinámicamente con catálogo de accesorios -->
+                </div>
+                <div id="tiendaContenedorPolos" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <!-- Se llena dinámicamente con los 6 colores de polo -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: 14 Medallas Coleccionables -->
+    <div class="modal-overlay" id="modalMedallas">
+        <div class="modal-caja" style="max-width: 740px;">
+            <div class="modal-cabecera">
+                <h3>Medallas de Logro Ambiental (14)</h3>
+                <button class="btn-cerrar-modal" id="btnCerrarMedallas">✕</button>
+            </div>
+            <div class="modal-cuerpo" style="max-height: 500px; overflow-y: auto;">
+                <p style="font-size: 13.5px; color: #64748B; font-weight: 600; margin-bottom: 14px;">
+                    Supera metas especiales de ahorro, precisión y conocimiento para coleccionar las 14 medallas del cuidado ambiental en Ica:
+                </p>
+                <div id="medallasContenedorGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Ranking del Salón -->
+    <div class="modal-overlay" id="modalRanking">
+        <div class="modal-caja" style="max-width: 720px;">
+            <div class="modal-cabecera">
+                <h3>Cuadro de Desempeño Escolar</h3>
+                <button class="btn-cerrar-modal" id="btnCerrarRanking">✕</button>
+            </div>
+            <div class="modal-cuerpo">
+                <!-- Filtros de Aula -->
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label for="filtroRankingGrado" style="font-size: 13px; font-weight: 800; color: #475569;">Grado:</label>
+                        <select id="filtroRankingGrado" class="input-eco" style="padding: 6px 10px; width: auto; font-size: 13px;">
+                            <option value="">Todos los grados</option>
+                            <option value="1">1.° Primaria</option>
+                            <option value="2">2.° Primaria</option>
+                            <option value="3">3.° Primaria</option>
+                            <option value="4">4.° Primaria</option>
+                            <option value="5" selected>5.° Primaria</option>
+                            <option value="6">6.° Primaria</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label for="filtroRankingSeccion" style="font-size: 13px; font-weight: 800; color: #475569;">Sección:</label>
+                        <select id="filtroRankingSeccion" class="input-eco" style="padding: 6px 10px; width: auto; font-size: 13px;">
+                            <option value="">Todas las secciones</option>
+                            <option value="A" selected>Sección "A"</option>
+                            <option value="B">Sección "B"</option>
+                            <option value="C">Sección "C"</option>
+                            <option value="D">Sección "D"</option>
+                        </select>
+                    </div>
+                    <span style="font-size: 12px; color: #64748B; font-weight: 600; margin-left: auto;">
+                        Criterio: ★ Estrellas y Puntaje
+                    </span>
+                </div>
+                <div id="rankingContenedorTabla" style="max-height: 380px; overflow-y: auto;">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Panel de Impacto Social Real -->
+    <div class="modal-overlay" id="modalImpacto">
+        <div class="modal-caja" style="max-width: 680px;">
+            <div class="modal-cabecera">
+                <h3>Impacto Ambiental Tangible</h3>
+                <button class="btn-cerrar-modal" id="btnCerrarImpacto">✕</button>
+            </div>
+            <div class="modal-cuerpo" style="max-height: 500px; overflow-y: auto;">
+                <p style="font-size: 14px; color: #475569; font-weight: 600; line-height: 1.45; margin-bottom: 12px;">
+                    Conversión acumulada de tus partidas a unidades tangibles de conservación en la provincia de Ica:
+                </p>
+                <div id="impactoContenedorCards" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div style="margin-top: 16px; background: #F1F5F9; border: 2px dashed #94A3B8; border-radius: 14px; padding: 12px 16px; font-size: 12.5px; color: #475569; line-height: 1.4;">
+                    <strong>¿Por qué importa en Ica?</strong> Nuestra región afronta un estrés hídrico desértico elevado y alta radiación solar. Ahorrar agua, desconectar consumos fantasma y cultivar biohuertos genera un impacto escolar directo y medible.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts del juego (orden de dependencias) -->
+    <script src="js/audio.js"></script>
+    <script src="js/catalogoNiveles.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/MinijuegoBase.js"></script>
+    <script src="js/LimpiezaMonstruosa.js"></script>
+    <script src="js/GuardianAgua.js"></script>
+    <script src="js/ApagaAhorra.js"></script>
+    <script src="js/SembradoresVerde.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Entorno y dependencias
+node_modules/
+.vscode/
+.idea/
+*.log
+
+# Archivos temporales
+*.tmp
+dom.html
+*.zip
+
