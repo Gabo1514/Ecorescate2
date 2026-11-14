@@ -1222,6 +1222,21 @@ canvas#lienzoJuego {
     box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.2);
 }
 
+.input-nota-tabla {
+    transition: all 0.15s ease;
+}
+
+.input-nota-tabla:focus {
+    outline: none;
+    border-color: var(--color-morado) !important;
+    background: #FAF5FF !important;
+    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.25);
+}
+
+.input-nota-tabla:hover {
+    border-color: var(--color-morado);
+}
+
 /* ---------------- RESPONSIVIDAD PARA CELULAR ---------------- */
 @media (max-width: 850px) {
     .header-eco {

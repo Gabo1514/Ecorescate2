@@ -603,12 +603,27 @@ class AppEcoRescate {
                 <td style="font-weight: 900; color: #B45309;">
                     ★ ${a.totalEstrellas} / 120
                 </td>
-                <td style="text-align: center;">
-                    <span class="badge-nota-vigesimal" style="background: ${esc.bg}; color: ${esc.color}; border: 1.5px solid ${esc.borde}; padding: 3px 8px; border-radius: 8px; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                        <span>${a.calificacion} / 20</span>
-                        <span style="font-size: 10px; font-weight: 900; background: ${esc.color}; color: #FFFFFF; border-radius: 4px; padding: 1px 4px;">${esc.literal}</span>
+                <td style="text-align: center; min-width: 140px; background: #FAF5FF;">
+                    <div class="caja-nota-editable" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                        <input 
+                            type="number" 
+                            class="input-nota-tabla" 
+                            data-clave="${a.clave}" 
+                            min="1" 
+                            max="20" 
+                            step="1" 
+                            value="${a.calificacion}" 
+                            title="Haz clic para escribir o cambiar la nota (1 al 20)"
+                            style="width: 48px; padding: 4px 2px; font-size: 15px; font-weight: 900; text-align: center; border: 2px solid var(--color-trazo); border-radius: 8px; background: #FFFFFF; color: var(--color-trazo); cursor: pointer;"
+                        >
+                        <span style="font-weight: 800; font-size: 12px; color: #64748B;">/20</span>
+                        <span class="badge-mini-escala" style="background: ${esc.bg}; color: ${esc.color}; border: 1.5px solid ${esc.borde}; padding: 2px 6px; border-radius: 6px; font-weight: 900; font-size: 11px;">
+                            ${esc.literal}
+                        </span>
+                    </div>
+                    <span class="estado-guardado-nota" style="display: block; font-size: 10px; font-weight: 700; color: ${a.esDocente ? '#7C3AED' : '#64748B'}; min-height: 14px; margin-top: 2px;">
+                        ${a.esDocente ? 'Nota Docente' : 'Nota Juego'}
                     </span>
-                    <span style="display: block; font-size: 10px; color: #64748B; font-weight: 700; margin-top: 2px;">${origenTexto}</span>
                 </td>
                 <td style="font-weight: 800; color: #6B21A8;">
                     ${a.medallas} / 14
@@ -631,6 +646,66 @@ class AppEcoRescate {
                 window.audioEco.clic();
                 this.abrirFichaAlumno(a.clave);
             });
+
+            // Eventos para editar la nota directamente en la fila de la tabla
+            const inputNota = tr.querySelector('.input-nota-tabla');
+            const badgeEscala = tr.querySelector('.badge-mini-escala');
+            const estadoGuardado = tr.querySelector('.estado-guardado-nota');
+
+            if (inputNota) {
+                inputNota.addEventListener('input', () => {
+                    let val = parseInt(inputNota.value, 10);
+                    if (isNaN(val)) return;
+                    val = Math.max(1, Math.min(20, val));
+                    const nuevaEscala = (typeof obtenerEscalaMINEDU === 'function')
+                        ? obtenerEscalaMINEDU(val)
+                        : { literal: 'A', bg: '#DBEAFE', color: '#1D4ED8', borde: '#93C5FD' };
+                    if (badgeEscala) {
+                        badgeEscala.textContent = nuevaEscala.literal;
+                        badgeEscala.style.background = nuevaEscala.bg;
+                        badgeEscala.style.color = nuevaEscala.color;
+                        badgeEscala.style.borderColor = nuevaEscala.borde;
+                    }
+                });
+
+                const guardarNotaFila = () => {
+                    let val = parseInt(inputNota.value, 10);
+                    if (isNaN(val) || val < 1) val = 1;
+                    if (val > 20) val = 20;
+                    inputNota.value = val;
+
+                    const clave = inputNota.getAttribute('data-clave');
+                    const guardado = window.storageEco.guardarCalificacionDocente(clave, val, a.observacionDocente || '');
+                    if (guardado) {
+                        window.audioEco.clic();
+                        if (estadoGuardado) {
+                            estadoGuardado.textContent = '¡Guardado ✓!';
+                            estadoGuardado.style.color = '#16A34A';
+                            setTimeout(() => {
+                                estadoGuardado.textContent = 'Nota Docente';
+                                estadoGuardado.style.color = '#7C3AED';
+                            }, 1800);
+                        }
+                        // Recalcular métricas de la cabecera
+                        const g = this.filtroDocenteGrado ? this.filtroDocenteGrado.value : '';
+                        const s = this.filtroDocenteSeccion ? this.filtroDocenteSeccion.value : '';
+                        const b = this.buscarAlumnoDocente ? this.buscarAlumnoDocente.value : '';
+                        const nuevoReporte = window.storageEco.obtenerReporteDocente(g, s, b);
+                        if (this.docentePromedioNotas && nuevoReporte.metricas.escalaPromedio) {
+                            const escP = nuevoReporte.metricas.escalaPromedio;
+                            this.docentePromedioNotas.innerHTML = `${nuevoReporte.metricas.promedioCalificacion} / 20 <span class="badge-mini-escala" style="background: ${escP.bg}; color: ${escP.color}; border: 1.5px solid ${escP.borde}; padding: 2px 7px; border-radius: 6px; font-size: 11px; margin-left: 4px;">${escP.literal}</span>`;
+                        }
+                    }
+                };
+
+                inputNota.addEventListener('change', guardarNotaFila);
+                inputNota.addEventListener('blur', guardarNotaFila);
+                inputNota.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        inputNota.blur();
+                    }
+                });
+            }
 
             this.cuerpoTablaDocente.appendChild(tr);
         });
