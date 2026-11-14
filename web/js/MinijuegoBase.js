@@ -72,6 +72,7 @@ class MinijuegoBase {
         this.gano = false;
         this.motivoFin = '';
         this.estrellasNivel = 0;
+        this.notaNivel = 0;
         this.recompensa = null;
         this.animacionEstrellas = 0;
 
@@ -211,6 +212,7 @@ class MinijuegoBase {
         this.gano = false;
         this.motivoFin = '';
         this.estrellasNivel = 0;
+        this.notaNivel = 0;
         this.recompensa = null;
         this.mensajeToast = null;
         this.palabraCombo = null;
@@ -609,6 +611,9 @@ class MinijuegoBase {
 
         if (ganado) {
             this.estrellasNivel = calcularEstrellas(this.def, true, this.errores, this.tiempoJuego);
+            this.notaNivel = (typeof calcularNotaVigesimal === 'function')
+                ? calcularNotaVigesimal(this.def, true, this.aciertos, this.totalRetos, this.errores, this.tiempoJuego, null)
+                : 18;
             window.audioEco.victoria();
             this.crearConfeti(90);
 
@@ -623,6 +628,9 @@ class MinijuegoBase {
             }
         } else {
             this.estrellasNivel = 0;
+            this.notaNivel = (typeof calcularNotaVigesimal === 'function')
+                ? calcularNotaVigesimal(this.def, false, this.aciertos, this.totalRetos, this.errores, this.tiempoJuego, null)
+                : 8;
             window.audioEco.derrota();
         }
 
@@ -652,6 +660,11 @@ class MinijuegoBase {
     finalizarPartida(preguntaCorrecta = null) {
         this.estado = 'FIN';
 
+        // Recalcular calificación escolar final (1 al 20) considerando el Desafío del Saber
+        if (typeof calcularNotaVigesimal === 'function') {
+            this.notaNivel = calcularNotaVigesimal(this.def, this.gano, this.aciertos, this.totalRetos, this.errores, this.tiempoJuego, preguntaCorrecta);
+        }
+
         // Calcular impacto social
         const factorAcierto = this.tipo.impactoPorAcierto || 0;
         const factorNivel = this.tipo.impactoPorNivel || 0;
@@ -669,6 +682,7 @@ class MinijuegoBase {
             impacto: impactoTotal,
             preguntaCorrecta,
             estrellas: this.estrellasNivel,
+            nota: this.notaNivel,
             mejorCombo: this.mejorCombo
         });
 
@@ -1907,6 +1921,39 @@ class MinijuegoBase {
         const rollMon = Math.min(1, this.tiempoEnVictoria / 1.1);
         const mon = Math.round(totalMonedas * rollMon);
         ctx.fillText(`+${mon} EcoMonedas`, x + w - 65, yStats + 30);
+
+        // Placa escolar de Calificación Vigesimal (1 al 20 - MINEDU)
+        const notaFinal = this.notaNivel || (this.gano ? 18 : 8);
+        const escala = (typeof obtenerEscalaMINEDU === 'function')
+            ? obtenerEscalaMINEDU(notaFinal)
+            : { literal: 'AD', descripcion: 'Logro Destacado', bg: '#DCFCE7', color: '#16A34A', borde: '#86EFAC' };
+
+        const xBadge = x + w - 245;
+        const yBadge = yStats + 48;
+        const wBadge = 180;
+        const hBadge = 86;
+
+        ctx.save();
+        ctx.fillStyle = escala.bg;
+        ctx.beginPath();
+        ctx.roundRect(xBadge, yBadge, wBadge, hBadge, 12);
+        ctx.fill();
+        ctx.strokeStyle = escala.borde;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#64748B';
+        ctx.font = 'bold 10px "Segoe UI", system-ui, sans-serif';
+        ctx.fillText('CALIFICACIÓN (1 AL 20)', xBadge + wBadge / 2, yBadge + 19);
+
+        ctx.fillStyle = escala.color;
+        ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
+        ctx.fillText(`${notaFinal} / 20`, xBadge + wBadge / 2, yBadge + 49);
+
+        ctx.font = 'bold 11.5px "Segoe UI", system-ui, sans-serif';
+        ctx.fillText(`${escala.literal} • ${escala.descripcion}`, xBadge + wBadge / 2, yBadge + 73);
+        ctx.restore();
 
         // Medallas desbloqueadas si hubo
         if (this.recompensa && this.recompensa.medallasGanadas.length > 0) {

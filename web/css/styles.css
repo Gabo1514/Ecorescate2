@@ -1049,7 +1049,7 @@ canvas#lienzoJuego {
 
 .grid-metricas-docente {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
     gap: 14px;
 }
 
@@ -1188,6 +1188,38 @@ canvas#lienzoJuego {
 .btn-tabla-ver:hover {
     background: #4F46E5;
     color: #FFFFFF;
+}
+
+/* Insignias de Calificación Escolar (1 al 20 - MINEDU) */
+.badge-nota-vigesimal {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.badge-mini-escala {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-weight: 800;
+    font-size: 11px;
+}
+
+.caja-calificacion-docente {
+    box-shadow: 0 3px 0 var(--color-trazo);
+    transition: all 0.2s ease;
+}
+
+.caja-calificacion-docente input[type="number"]:focus,
+.caja-calificacion-docente input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-morado);
+    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.2);
 }
 
 /* ---------------- RESPONSIVIDAD PARA CELULAR ---------------- */

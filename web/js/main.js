@@ -85,6 +85,7 @@ class AppEcoRescate {
         this.docenteTotalAgua = document.getElementById('docenteTotalAgua');
         this.docenteTotalResiduos = document.getElementById('docenteTotalResiduos');
         this.docenteTotalEnergiaBio = document.getElementById('docenteTotalEnergiaBio');
+        this.docentePromedioNotas = document.getElementById('docentePromedioNotas');
 
         // Elementos de Ficha Alumno
         this.fichaAlumnoTitulo = document.getElementById('fichaAlumnoTitulo');
@@ -532,6 +533,7 @@ class AppEcoRescate {
             this.instanciaJuego.detener();
             this.instanciaJuego = null;
         }
+        this.cerrarModal(this.modalRegistro);
         this.vistaMenu.style.display = 'none';
         this.vistaMapa.style.display = 'none';
         this.vistaJuego.style.display = 'none';
@@ -551,6 +553,10 @@ class AppEcoRescate {
         if (this.docenteTotalAgua) this.docenteTotalAgua.textContent = `${reporte.metricas.totalLitrosAgua.toLocaleString()} L`;
         if (this.docenteTotalResiduos) this.docenteTotalResiduos.textContent = `${reporte.metricas.totalResiduos.toLocaleString()} kg`;
         if (this.docenteTotalEnergiaBio) this.docenteTotalEnergiaBio.textContent = `${reporte.metricas.totalKwhEnergia} kWh / ${reporte.metricas.totalAreaVerde} m²`;
+        if (this.docentePromedioNotas && reporte.metricas.escalaPromedio) {
+            const esc = reporte.metricas.escalaPromedio;
+            this.docentePromedioNotas.innerHTML = `${reporte.metricas.promedioCalificacion} / 20 <span class="badge-mini-escala" style="background: ${esc.bg}; color: ${esc.color}; border: 1.5px solid ${esc.borde}; padding: 2px 7px; border-radius: 6px; font-size: 11px; margin-left: 4px;">${esc.literal}</span>`;
+        }
 
         if (!this.cuerpoTablaDocente) return;
         this.cuerpoTablaDocente.innerHTML = '';
@@ -558,7 +564,7 @@ class AppEcoRescate {
         if (reporte.alumnos.length === 0) {
             this.cuerpoTablaDocente.innerHTML = `
                 <tr>
-                    <td colspan="11" style="text-align: center; padding: 24px; color: #64748B;">
+                    <td colspan="12" style="text-align: center; padding: 24px; color: #64748B;">
                         No se encontraron estudiantes para los filtros seleccionados.
                     </td>
                 </tr>
@@ -568,6 +574,9 @@ class AppEcoRescate {
 
         reporte.alumnos.forEach((a) => {
             const tr = document.createElement('tr');
+            const esc = a.escala || { literal: 'A', bg: '#DBEAFE', color: '#1D4ED8', borde: '#93C5FD' };
+            const origenTexto = a.esDocente ? 'Docente' : 'Misiones';
+
             tr.innerHTML = `
                 <td style="font-weight: 800; font-family: monospace; color: #475569;">${a.dni}</td>
                 <td>
@@ -593,6 +602,13 @@ class AppEcoRescate {
                 </td>
                 <td style="font-weight: 900; color: #B45309;">
                     ★ ${a.totalEstrellas} / 120
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge-nota-vigesimal" style="background: ${esc.bg}; color: ${esc.color}; border: 1.5px solid ${esc.borde}; padding: 3px 8px; border-radius: 8px; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                        <span>${a.calificacion} / 20</span>
+                        <span style="font-size: 10px; font-weight: 900; background: ${esc.color}; color: #FFFFFF; border-radius: 4px; padding: 1px 4px;">${esc.literal}</span>
+                    </span>
+                    <span style="display: block; font-size: 10px; color: #64748B; font-weight: 700; margin-top: 2px;">${origenTexto}</span>
                 </td>
                 <td style="font-weight: 800; color: #6B21A8;">
                     ${a.medallas} / 14
@@ -628,6 +644,7 @@ class AppEcoRescate {
         const impacto = window.storageEco.obtenerImpacto(perfil);
         const totalEstrellas = window.storageEco.totalEstrellasGeneral(perfil);
         const totalNiveles = window.storageEco.totalNivelesSuperados(perfil);
+        const calif = window.storageEco.obtenerCalificacionEstudiante(perfil);
 
         let partidasHtml = '';
         const partidasRecientes = (perfil.partidas || []).slice(-8).reverse();
@@ -642,25 +659,37 @@ class AppEcoRescate {
                             <th style="padding: 6px 8px;">Misión</th>
                             <th style="padding: 6px 8px;">Nivel</th>
                             <th style="padding: 6px 8px;">Puntaje</th>
+                            <th style="padding: 6px 8px;">Nota (1-20)</th>
                             <th style="padding: 6px 8px;">Aciertos</th>
                             <th style="padding: 6px 8px;">Pregunta Ica</th>
                             <th style="padding: 6px 8px;">★</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${partidasRecientes.map(p => `
-                            <tr style="border-bottom: 1px solid #E2E8F0;">
-                                <td style="padding: 6px 8px;">${p.fecha.slice(5, 16)}</td>
-                                <td style="padding: 6px 8px; font-weight: 700;">${p.minijuego || p.juegoId}</td>
-                                <td style="padding: 6px 8px;">Nivel ${p.nivel}</td>
-                                <td style="padding: 6px 8px; font-weight: 800;">${p.puntaje}</td>
-                                <td style="padding: 6px 8px;">${p.aciertos}/${p.aciertos + (p.errores || 0)}</td>
-                                <td style="padding: 6px 8px; color: ${p.preguntaCorrecta ? '#15803D' : '#DC2626'}; font-weight: 800;">
-                                    ${p.preguntaCorrecta ? 'Correcta (+30)' : 'Incorrecta'}
-                                </td>
-                                <td style="padding: 6px 8px; color: #EAB308; font-weight: 800;">★${p.estrellas}</td>
-                            </tr>
-                        `).join('')}
+                        ${partidasRecientes.map(p => {
+                            const notaItem = p.nota || 18;
+                            const escItem = (typeof obtenerEscalaMINEDU === 'function')
+                                ? obtenerEscalaMINEDU(notaItem)
+                                : { literal: 'A', bg: '#DBEAFE', color: '#1D4ED8', borde: '#93C5FD' };
+                            return `
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td style="padding: 6px 8px;">${p.fecha.slice(5, 16)}</td>
+                                    <td style="padding: 6px 8px; font-weight: 700;">${p.minijuego || p.juegoId}</td>
+                                    <td style="padding: 6px 8px;">Nivel ${p.nivel}</td>
+                                    <td style="padding: 6px 8px; font-weight: 800;">${p.puntaje}</td>
+                                    <td style="padding: 6px 8px;">
+                                        <span class="badge-mini-escala" style="background: ${escItem.bg}; color: ${escItem.color}; border: 1px solid ${escItem.borde}; padding: 2px 6px; border-radius: 6px; font-weight: 800;">
+                                            ${notaItem}/20 (${escItem.literal})
+                                        </span>
+                                    </td>
+                                    <td style="padding: 6px 8px;">${p.aciertos}/${p.aciertos + (p.errores || 0)}</td>
+                                    <td style="padding: 6px 8px; color: ${p.preguntaCorrecta ? '#15803D' : '#DC2626'}; font-weight: 800;">
+                                        ${p.preguntaCorrecta ? 'Correcta (+30)' : 'Incorrecta'}
+                                    </td>
+                                    <td style="padding: 6px 8px; color: #EAB308; font-weight: 800;">★${p.estrellas}</td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             `;
@@ -703,9 +732,83 @@ class AppEcoRescate {
                     </div>
                 </div>
 
+                <!-- SECCIÓN DE CALIFICACIÓN DOCENTE (1 AL 20) -->
+                <div class="caja-calificacion-docente" style="background: #F8FAFC; border: 2.5px solid #CBD5E1; border-radius: 14px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 14px; font-weight: 900; color: #1E293B;">
+                            Calificación del Docente (Escala Escolar 1 al 20)
+                        </span>
+                        <span id="badgeFichaEscala" style="background: ${calif.escala.bg}; color: ${calif.escala.color}; border: 1.5px solid ${calif.escala.borde}; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 800;">
+                            ${calif.escala.literal} • ${calif.escala.descripcion}
+                        </span>
+                    </div>
+
+                    <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label for="inputNotaDocente" style="font-size: 13px; font-weight: 800; color: #334155;">Nota (1 a 20):</label>
+                            <input type="number" id="inputNotaDocente" min="1" max="20" step="1" value="${calif.nota}" style="width: 72px; padding: 6px 10px; font-size: 18px; font-weight: 900; border: 2.5px solid var(--color-trazo); border-radius: 10px; text-align: center; color: var(--color-trazo);">
+                            <span style="font-weight: 900; font-size: 14px; color: #64748B;">/ 20</span>
+                        </div>
+                        <div style="font-size: 11.5px; color: #64748B; font-weight: 700;">
+                            MINEDU: <b>18-20 AD</b> | <b>14-17 A</b> | <b>11-13 B</b> | <b>01-10 C</b>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label for="inputObsDocente" style="font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px;">Observación / Retroalimentación Pedagógica:</label>
+                        <input type="text" id="inputObsDocente" placeholder="Ej: Demuestra alto dominio en el cuidado del agua en Ica y clasificación de residuos." value="${perfil.observacionDocente || ''}" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 2px solid #CBD5E1; border-radius: 10px; box-sizing: border-box; font-family: inherit;">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="msgCalificacionGuardada" style="font-size: 12px; font-weight: 800; color: #16A34A; display: none;">¡Calificación guardada correctamente!</span>
+                        <button type="button" id="btnGuardarNotaDocente" class="btn-principal" style="padding: 8px 20px; font-size: 13px; background: #16A34A; color: white; margin-left: auto;">
+                            Guardar Calificación
+                        </button>
+                    </div>
+                </div>
+
                 <h5 style="font-size: 14px; font-weight: 800; color: #334155; margin-bottom: 6px;">Historial Reciente de Misiones Evaluadas</h5>
                 ${partidasHtml}
             `;
+
+            // Vincular cambio en vivo de nota para actualizar escala MINEDU
+            const inputNota = this.cuerpoFichaAlumno.querySelector('#inputNotaDocente');
+            const badgeEscala = this.cuerpoFichaAlumno.querySelector('#badgeFichaEscala');
+            const inputObs = this.cuerpoFichaAlumno.querySelector('#inputObsDocente');
+            const btnGuardar = this.cuerpoFichaAlumno.querySelector('#btnGuardarNotaDocente');
+            const msgGuardada = this.cuerpoFichaAlumno.querySelector('#msgCalificacionGuardada');
+
+            if (inputNota && badgeEscala) {
+                const actualizarBadgeEscala = () => {
+                    const n = Math.max(1, Math.min(20, Math.round(Number(inputNota.value) || 1)));
+                    const esc = (typeof obtenerEscalaMINEDU === 'function')
+                        ? obtenerEscalaMINEDU(n)
+                        : { literal: 'A', descripcion: 'Logro Esperado', bg: '#DBEAFE', color: '#1D4ED8', borde: '#93C5FD' };
+                    badgeEscala.textContent = `${esc.literal} • ${esc.descripcion}`;
+                    badgeEscala.style.background = esc.bg;
+                    badgeEscala.style.color = esc.color;
+                    badgeEscala.style.borderColor = esc.borde;
+                };
+                inputNota.addEventListener('input', actualizarBadgeEscala);
+                inputNota.addEventListener('change', actualizarBadgeEscala);
+            }
+
+            if (btnGuardar) {
+                btnGuardar.addEventListener('click', () => {
+                    const notaFinal = Math.max(1, Math.min(20, Math.round(Number(inputNota.value) || 1)));
+                    const obsFinal = inputObs ? inputObs.value : '';
+                    window.storageEco.guardarCalificacionDocente(clave, notaFinal, obsFinal);
+                    window.audioEco.moneda();
+
+                    if (msgGuardada) {
+                        msgGuardada.style.display = 'inline';
+                        setTimeout(() => { msgGuardada.style.display = 'none'; }, 2600);
+                    }
+
+                    // Actualizar panel docente en segundo plano
+                    this.renderizarPanelDocente();
+                });
+            }
         }
 
         if (this.modalFichaAlumno) this.modalFichaAlumno.classList.add('activo');
@@ -758,9 +861,11 @@ class AppEcoRescate {
     }
 
     lanzarNivel(juegoId, nivelNumero) {
+        this.cerrarModal(this.modalRegistro);
         this.vistaMenu.style.display = 'none';
         this.vistaMapa.style.display = 'none';
         this.vistaJuego.style.display = 'flex';
+        if (this.vistaDocente) this.vistaDocente.style.display = 'none';
 
         // Detener instancia previa
         if (this.instanciaJuego) {

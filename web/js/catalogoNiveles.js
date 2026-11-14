@@ -745,6 +745,74 @@ function calcularEstrellas(defNivel, superado, errores, segundos) {
     return 1;
 }
 
+/**
+ * Calcula la calificación escolar en la escala vigesimal peruana (1 al 20)
+ * según criterios pedagógicos de MINEDU para educación primaria.
+ */
+function calcularNotaVigesimal(defNivel, superado, aciertos = 0, totalRetos = 0, errores = 0, segundos = 0, preguntaCorrecta = null) {
+    if (!superado) {
+        // En inicio (C): calificación de 01 a 10 según avance alcanzado
+        const total = totalRetos > 0 ? totalRetos : Math.max(1, aciertos + errores);
+        const ratio = Math.min(1, Math.max(0, aciertos / total));
+        return Math.max(1, Math.min(10, Math.round(ratio * 10)));
+    }
+
+    // Nivel superado: nota base aprobatoria 14 (Logro Esperado - A)
+    let nota = 14;
+
+    // 1. Criterio de precisión (errores cometidos)
+    const err3 = (defNivel && typeof defNivel.err3 === 'number') ? defNivel.err3 : 0;
+    const err2 = (defNivel && typeof defNivel.err2 === 'number') ? defNivel.err2 : 2;
+    if (errores === 0) {
+        nota += 3; // Impecable (+3)
+    } else if (errores <= err3) {
+        nota += 2; // Muy alta precisión (+2)
+    } else if (errores <= err2) {
+        nota += 1; // Precisión esperada (+1)
+    } else {
+        nota -= 1; // Muchos errores (-1)
+    }
+
+    // 2. Criterio de agilidad y tiempo
+    const tiempoRef = (defNivel && defNivel.tiempo) ? defNivel.tiempo : 60;
+    if (segundos <= Math.round(tiempoRef * 0.6)) {
+        nota += 2; // Rápido (+2)
+    } else if (segundos <= Math.round(tiempoRef * 0.85)) {
+        nota += 1; // Adecuado (+1)
+    }
+
+    // 3. Desafío del Saber (pregunta contextualizada de Ica)
+    if (preguntaCorrecta === true) {
+        nota += 1; // Acertó (+1)
+    } else if (preguntaCorrecta === false) {
+        nota -= 1; // Erró (-1)
+    }
+
+    // Acotar rigurosamente entre 11 y 20 para niveles superados
+    return Math.max(11, Math.min(20, Math.round(nota)));
+}
+
+/**
+ * Escala Cualitativa MINEDU (Perú) para notas de 1 al 20:
+ * - 18 a 20: AD (Logro Destacado)
+ * - 14 a 17: A  (Logro Esperado)
+ * - 11 a 13: B  (En Proceso)
+ * - 01 a 10: C  (En Inicio)
+ */
+function obtenerEscalaMINEDU(nota) {
+    const n = Math.max(1, Math.min(20, Math.round(Number(nota) || 1)));
+    if (n >= 18) {
+        return { literal: 'AD', descripcion: 'Logro Destacado', color: '#16A34A', bg: '#DCFCE7', borde: '#86EFAC' };
+    }
+    if (n >= 14) {
+        return { literal: 'A', descripcion: 'Logro Esperado', color: '#2563EB', bg: '#DBEAFE', borde: '#93C5FD' };
+    }
+    if (n >= 11) {
+        return { literal: 'B', descripcion: 'En Proceso', color: '#D97706', bg: '#FEF3C7', borde: '#FDE68A' };
+    }
+    return { literal: 'C', descripcion: 'En Inicio', color: '#DC2626', bg: '#FEE2E2', borde: '#FCA5A5' };
+}
+
 /** Criterios explicados para la vista previa del nivel */
 function obtenerCriteriosNivel(defNivel) {
     const tiempo3 = Math.round(defNivel.tiempo * 0.6);
@@ -801,4 +869,6 @@ window.CATALOGO_ACCESORIOS = CATALOGO_ACCESORIOS;
 window.COLORES_POLO = COLORES_POLO;
 window.formatearTiempo = formatearTiempo;
 window.calcularEstrellas = calcularEstrellas;
+window.calcularNotaVigesimal = calcularNotaVigesimal;
+window.obtenerEscalaMINEDU = obtenerEscalaMINEDU;
 window.obtenerCriteriosNivel = obtenerCriteriosNivel;

@@ -37,13 +37,13 @@ class GestorAlmacenamiento {
         if (Object.keys(this.perfiles).length > 1) return;
 
         const base = [
-            { dni: '74839201', nombre: 'Mateo Quispe', grado: 5, seccion: 'A', monedas: 248, accesorio: 'GORRA', polo: 1, estrellas: { LIMPIEZA: [3,3,3,3,2,3,2,3,2,0], AGUA: [3,3,3,2,3,2,0,0,0,0], ENERGIA: [3,3,2,2,0,0,0,0,0,0], VERDE: [3,3,2,0,0,0,0,0,0,0] } },
-            { dni: '71234567', nombre: 'Camila Huamán', grado: 5, seccion: 'A', monedas: 310, accesorio: 'CORONA', polo: 2, estrellas: { LIMPIEZA: [3,3,3,3,3,3,3,3,2,2], AGUA: [3,3,3,3,3,2,2,0,0,0], ENERGIA: [3,3,3,2,2,0,0,0,0,0], VERDE: [3,3,3,2,0,0,0,0,0,0] } },
-            { dni: '72345678', nombre: 'Luciana Flores', grado: 5, seccion: 'A', monedas: 180, accesorio: 'LENTES', polo: 0, estrellas: { LIMPIEZA: [3,3,3,2,2,2,0,0,0,0], AGUA: [3,3,3,3,2,0,0,0,0,0], ENERGIA: [3,2,2,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
-            { dni: '73456789', nombre: 'Diego Mendoza', grado: 5, seccion: 'B', monedas: 140, accesorio: 'VISERA', polo: 3, estrellas: { LIMPIEZA: [3,3,2,2,0,0,0,0,0,0], AGUA: [3,3,2,0,0,0,0,0,0,0], ENERGIA: [3,2,0,0,0,0,0,0,0,0], VERDE: [2,2,0,0,0,0,0,0,0,0] } },
-            { dni: '75678901', nombre: 'Valeria Ramos', grado: 5, seccion: 'B', monedas: 120, accesorio: 'NINGUNO', polo: 4, estrellas: { LIMPIEZA: [3,3,2,0,0,0,0,0,0,0], AGUA: [3,2,0,0,0,0,0,0,0,0], ENERGIA: [2,2,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } },
-            { dni: '76789012', nombre: 'Sebastián Rojas', grado: 6, seccion: 'A', monedas: 195, accesorio: 'SOMBRERO', polo: 0, estrellas: { LIMPIEZA: [3,3,3,3,2,0,0,0,0,0], AGUA: [3,3,3,2,0,0,0,0,0,0], ENERGIA: [3,3,0,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
-            { dni: '77890123', nombre: 'Andrea Gutiérrez', grado: 4, seccion: 'A', monedas: 90, accesorio: 'NINGUNO', polo: 1, estrellas: { LIMPIEZA: [3,2,2,0,0,0,0,0,0,0], AGUA: [2,2,0,0,0,0,0,0,0,0], ENERGIA: [2,0,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } }
+            { dni: '74839201', nombre: 'Mateo Quispe', grado: 5, seccion: 'A', monedas: 248, accesorio: 'GORRA', polo: 1, calificacionDocente: 18, observacionDocente: 'Muy buen desempeño en el cuidado de recursos hídricos en Ica.', estrellas: { LIMPIEZA: [3,3,3,3,2,3,2,3,2,0], AGUA: [3,3,3,2,3,2,0,0,0,0], ENERGIA: [3,3,2,2,0,0,0,0,0,0], VERDE: [3,3,2,0,0,0,0,0,0,0] } },
+            { dni: '71234567', nombre: 'Camila Huamán', grado: 5, seccion: 'A', monedas: 310, accesorio: 'CORONA', polo: 2, calificacionDocente: 19, observacionDocente: 'Liderazgo ecológico ejemplar y excelente respuesta en biohuerto.', estrellas: { LIMPIEZA: [3,3,3,3,3,3,3,3,2,2], AGUA: [3,3,3,3,3,2,2,0,0,0], ENERGIA: [3,3,3,2,2,0,0,0,0,0], VERDE: [3,3,3,2,0,0,0,0,0,0] } },
+            { dni: '72345678', nombre: 'Luciana Flores', grado: 5, seccion: 'A', monedas: 180, accesorio: 'LENTES', polo: 0, calificacionDocente: 17, observacionDocente: 'Buen avance en reciclaje de residuos sólidos.', estrellas: { LIMPIEZA: [3,3,3,2,2,2,0,0,0,0], AGUA: [3,3,3,3,2,0,0,0,0,0], ENERGIA: [3,2,2,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
+            { dni: '73456789', nombre: 'Diego Mendoza', grado: 5, seccion: 'B', monedas: 140, accesorio: 'VISERA', polo: 3, calificacionDocente: 16, observacionDocente: 'Participa activamente en brigada escolar del agua.', estrellas: { LIMPIEZA: [3,3,2,2,0,0,0,0,0,0], AGUA: [3,3,2,0,0,0,0,0,0,0], ENERGIA: [3,2,0,0,0,0,0,0,0,0], VERDE: [2,2,0,0,0,0,0,0,0,0] } },
+            { dni: '75678901', nombre: 'Valeria Ramos', grado: 5, seccion: 'B', monedas: 120, accesorio: 'NINGUNO', polo: 4, calificacionDocente: 15, observacionDocente: 'Requiere reforzar conocimientos de consumo fantasma.', estrellas: { LIMPIEZA: [3,3,2,0,0,0,0,0,0,0], AGUA: [3,2,0,0,0,0,0,0,0,0], ENERGIA: [2,2,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } },
+            { dni: '76789012', nombre: 'Sebastián Rojas', grado: 6, seccion: 'A', monedas: 195, accesorio: 'SOMBRERO', polo: 0, calificacionDocente: 17, observacionDocente: 'Constante y comprometido con el biohuerto escolar.', estrellas: { LIMPIEZA: [3,3,3,3,2,0,0,0,0,0], AGUA: [3,3,3,2,0,0,0,0,0,0], ENERGIA: [3,3,0,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
+            { dni: '77890123', nombre: 'Andrea Gutiérrez', grado: 4, seccion: 'A', monedas: 90, accesorio: 'NINGUNO', polo: 1, calificacionDocente: 14, observacionDocente: 'Progreso favorable en la clasificación de residuos.', estrellas: { LIMPIEZA: [3,2,2,0,0,0,0,0,0,0], AGUA: [2,2,0,0,0,0,0,0,0,0], ENERGIA: [2,0,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } }
         ];
 
         base.forEach(b => {
@@ -58,13 +58,16 @@ class GestorAlmacenamiento {
                     monedas: b.monedas,
                     accesorio: b.accesorio,
                     polo: b.polo,
+                    calificacionDocente: b.calificacionDocente,
+                    observacionDocente: b.observacionDocente,
+                    fechaCalificacionDocente: '2026-11-14',
                     polosComprados: [0, b.polo],
                     comprados: ['NINGUNO', b.accesorio],
                     estrellas: b.estrellas,
                     medallas: ['PRIMERA_ESTRELLA'],
                     partidas: [
-                        { fecha: '2026-11-14 09:30:15', juegoId: 'LIMPIEZA', minijuego: 'Limpieza Monstruosa', puntaje: 420, nivel: 1, superado: true, aciertos: 14, errores: 1, precisionPct: 93, duracionSeg: 48, impacto: 7.0, unidadImpacto: 'kg residuos', preguntaCorrecta: true, estrellas: 3 },
-                        { fecha: '2026-11-14 09:42:10', juegoId: 'AGUA', minijuego: 'Guardián del Agua', puntaje: 380, nivel: 1, superado: true, aciertos: 12, errores: 0, precisionPct: 100, duracionSeg: 52, impacto: 45.0, unidadImpacto: 'litros agua', preguntaCorrecta: true, estrellas: 3 }
+                        { fecha: '2026-11-14 09:30:15', juegoId: 'LIMPIEZA', minijuego: 'Limpieza Monstruosa', puntaje: 420, nivel: 1, superado: true, aciertos: 14, errores: 1, precisionPct: 93, duracionSeg: 48, impacto: 7.0, unidadImpacto: 'kg residuos', preguntaCorrecta: true, estrellas: 3, nota: 19, escala: 'AD' },
+                        { fecha: '2026-11-14 09:42:10', juegoId: 'AGUA', minijuego: 'Guardián del Agua', puntaje: 380, nivel: 1, superado: true, aciertos: 12, errores: 0, precisionPct: 100, duracionSeg: 52, impacto: 45.0, unidadImpacto: 'litros agua', preguntaCorrecta: true, estrellas: 3, nota: 20, escala: 'AD' }
                     ]
                 };
             }
@@ -321,6 +324,18 @@ class GestorAlmacenamiento {
         }
         perfil.monedas = (perfil.monedas || 0) + monedasGanadas;
 
+        // Determinar calificación escolar en escala vigesimal (1 al 20) y nivel MINEDU
+        let notaVigesimal = datosPartida.nota;
+        if (typeof notaVigesimal !== 'number') {
+            const defNivel = (JUEGOS[juegoId] && JUEGOS[juegoId].niveles) ? JUEGOS[juegoId].niveles[nivelNumero - 1] : { tiempo: 60, err2: 2, err3: 1 };
+            notaVigesimal = (typeof calcularNotaVigesimal === 'function')
+                ? calcularNotaVigesimal(defNivel, superado, aciertos, datosPartida.totalRetos || aciertos, errores, duracionSegundos, preguntaCorrecta)
+                : (superado ? 18 : 8);
+        }
+        const escalaInfo = (typeof obtenerEscalaMINEDU === 'function')
+            ? obtenerEscalaMINEDU(notaVigesimal)
+            : { literal: 'A', descripcion: 'Logro Esperado' };
+
         // Guardar sesión en historial
         const fechaStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
         const sesion = {
@@ -337,7 +352,10 @@ class GestorAlmacenamiento {
             impacto: Number(impacto.toFixed(2)),
             unidadImpacto: JUEGOS[juegoId] ? JUEGOS[juegoId].unidadImpacto : '',
             preguntaCorrecta: preguntaCorrecta === true ? 'SI' : (preguntaCorrecta === false ? 'NO' : ''),
-            estrellas
+            estrellas,
+            nota: notaVigesimal,
+            escala: escalaInfo.literal,
+            escalaDesc: escalaInfo.descripcion
         };
         perfil.partidas.push(sesion);
 
@@ -506,6 +524,61 @@ class GestorAlmacenamiento {
         return lista;
     }
 
+    // Guardar calificación manual (1 al 20) asignada por el docente
+    guardarCalificacionDocente(claveEstudiante, nota, observacion = '') {
+        const perfil = this.perfiles[claveEstudiante];
+        if (!perfil) return false;
+        const notaNum = Math.max(1, Math.min(20, Math.round(Number(nota) || 1)));
+        perfil.calificacionDocente = notaNum;
+        perfil.observacionDocente = (observacion || '').trim();
+        perfil.fechaCalificacionDocente = new Date().toISOString().slice(0, 10);
+        this.guardarPerfiles();
+        return true;
+    }
+
+    // Obtener calificación integral del estudiante (oficial del docente o promedio del juego)
+    obtenerCalificacionEstudiante(perfil) {
+        if (!perfil) {
+            const esc = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(14) : { literal: 'A', descripcion: 'Logro Esperado', color: '#2563EB', bg: '#DBEAFE', borde: '#93C5FD' };
+            return { nota: 14, escala: esc, esDocente: false, observacion: '' };
+        }
+        if (typeof perfil.calificacionDocente === 'number' && perfil.calificacionDocente >= 1 && perfil.calificacionDocente <= 20) {
+            const esc = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(perfil.calificacionDocente) : { literal: 'A', descripcion: 'Logro Esperado' };
+            return {
+                nota: perfil.calificacionDocente,
+                escala: esc,
+                esDocente: true,
+                observacion: perfil.observacionDocente || ''
+            };
+        }
+        const partidasConNota = (perfil.partidas || []).filter(p => typeof p.nota === 'number');
+        if (partidasConNota.length > 0) {
+            const sum = partidasConNota.reduce((a, b) => a + b.nota, 0);
+            const prom = Math.round((sum / partidasConNota.length) * 10) / 10;
+            const esc = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(Math.round(prom)) : { literal: 'A', descripcion: 'Logro Esperado' };
+            return {
+                nota: prom,
+                escala: esc,
+                esDocente: false,
+                observacion: ''
+            };
+        }
+        // Estimación a partir de estrellas obtenidas
+        const totEst = this.totalEstrellasGeneral(perfil);
+        const totNiv = this.totalNivelesSuperados(perfil);
+        let estimado = 14;
+        if (totNiv > 0) {
+            estimado = Math.min(20, Math.round(12 + (totEst / (totNiv * 3)) * 8));
+        }
+        const esc = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(estimado) : { literal: 'A', descripcion: 'Logro Esperado' };
+        return {
+            nota: estimado,
+            escala: esc,
+            esDocente: false,
+            observacion: ''
+        };
+    }
+
     // Métricas y reporte pedagógico para el portal docente
     obtenerReporteDocente(gradoFiltro = null, seccionFiltro = null, busqueda = '') {
         const alumnos = [];
@@ -556,6 +629,7 @@ class GestorAlmacenamiento {
             totalNivelesCompletados += totalNiveles;
 
             const preguntasAcertadas = (p.partidas || []).filter(s => s.preguntaCorrecta === true).length;
+            const calif = this.obtenerCalificacionEstudiante(p);
 
             alumnos.push({
                 clave: k,
@@ -581,7 +655,12 @@ class GestorAlmacenamiento {
                 impacto,
                 preguntasAcertadas,
                 totalPartidas: (p.partidas || []).length,
-                ultimaPartida: (p.partidas && p.partidas.length > 0) ? p.partidas[p.partidas.length - 1].fecha : 'Sin partidas'
+                ultimaPartida: (p.partidas && p.partidas.length > 0) ? p.partidas[p.partidas.length - 1].fecha : 'Sin partidas',
+                calificacion: calif.nota,
+                escala: calif.escala,
+                esDocente: calif.esDocente,
+                calificacionDocente: p.calificacionDocente || null,
+                observacionDocente: p.observacionDocente || ''
             });
         }
 
@@ -590,6 +669,10 @@ class GestorAlmacenamiento {
             if (b.totalEstrellas !== a.totalEstrellas) return b.totalEstrellas - a.totalEstrellas;
             return b.avancePct - a.avancePct;
         });
+
+        const sumaCalificaciones = alumnos.reduce((acc, a) => acc + (Number(a.calificacion) || 14), 0);
+        const promedioNotas = alumnos.length > 0 ? (Math.round((sumaCalificaciones / alumnos.length) * 10) / 10) : 0;
+        const escalaPromedio = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(Math.round(promedioNotas)) : { literal: 'A', descripcion: 'Logro Esperado' };
 
         return {
             alumnos,
@@ -600,19 +683,25 @@ class GestorAlmacenamiento {
                 totalResiduos: Number(totalResiduos.toFixed(1)),
                 totalKwhEnergia: Number(totalKwhEnergia.toFixed(2)),
                 totalAreaVerde: Number(totalAreaVerde.toFixed(1)),
-                promedioAvance: alumnos.length > 0 ? Math.round(alumnos.reduce((acc, a) => acc + a.avancePct, 0) / alumnos.length) : 0
+                promedioAvance: alumnos.length > 0 ? Math.round(alumnos.reduce((acc, a) => acc + a.avancePct, 0) / alumnos.length) : 0,
+                promedioCalificacion: promedioNotas,
+                escalaPromedio: escalaPromedio
             }
         };
     }
 
     // Exportar informe docente de todas las partidas a CSV separado por ';' con BOM UTF-8
     exportarCSV() {
-        const CABECERA = 'dni_codigo;alumno;grado;seccion;fecha;codigo_juego;minijuego;puntaje;nivel;completado;aciertos;errores;precision_pct;duracion_seg;impacto;unidad_impacto;pregunta_correcta;estrellas';
+        const CABECERA = 'dni_codigo;alumno;grado;seccion;fecha;codigo_juego;minijuego;puntaje;nivel;completado;aciertos;errores;precision_pct;duracion_seg;impacto;unidad_impacto;pregunta_correcta;estrellas;nota_vigesimal_1_20;escala_minedu;calificacion_docente;observacion_docente';
         const filas = [CABECERA];
 
         for (const k in this.perfiles) {
             const p = this.perfiles[k];
             for (const s of (p.partidas || [])) {
+                const notaPartida = s.nota || (s.superado === 'SI' ? 18 : 8);
+                const escalaPartida = s.escala || ((typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(notaPartida).literal : 'A');
+                const obsLimpia = (p.observacionDocente || '').replace(/"/g, '""');
+
                 const campos = [
                     p.dni || p.codigo || 'S/DNI',
                     p.nombre,
@@ -631,7 +720,11 @@ class GestorAlmacenamiento {
                     String(s.impacto).replace('.', ','),
                     s.unidadImpacto,
                     s.preguntaCorrecta,
-                    s.estrellas
+                    s.estrellas,
+                    notaPartida,
+                    escalaPartida,
+                    p.calificacionDocente || '',
+                    `"${obsLimpia}"`
                 ];
                 filas.push(campos.join(';'));
             }
