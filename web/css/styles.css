@@ -840,6 +840,356 @@ canvas#lienzoJuego {
     color: #064E3B;
 }
 
+/* ---------------- ACCESO DOCENTE Y LOGIN CON TABS ---------------- */
+.btn-acceso-docente {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EDE9FE;
+    color: #5B21B6;
+    border: 2px solid var(--color-trazo);
+    border-radius: 14px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--color-trazo);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    user-select: none;
+}
+
+.btn-acceso-docente:hover {
+    background: #DDD6FE;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--color-trazo);
+}
+
+.btn-acceso-docente:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--color-trazo);
+}
+
+.btn-acceso-docente.activo {
+    background: var(--color-morado);
+    color: #FFFFFF;
+}
+
+.tabs-login {
+    display: flex;
+    background: #F1F5F9;
+    border-bottom: 2.5px solid var(--color-trazo);
+    border-radius: 20px 20px 0 0;
+    overflow: hidden;
+}
+
+.tab-login-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #F1F5F9;
+    border: none;
+    border-right: 2px solid #E2E8F0;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #64748B;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab-login-btn:last-child {
+    border-right: none;
+}
+
+.tab-login-btn.activo {
+    background: #FFFFFF;
+    color: var(--color-trazo);
+    box-shadow: inset 0 -3px 0 var(--color-morado);
+}
+
+.alerta-reconocido {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #F0FDF4;
+    border: 2px solid #86EFAC;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #15803D;
+    animation: fadeIn 0.2s ease;
+}
+
+.lista-chips-alumnos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.chip-alumno {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #F8FAFC;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-trazo);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.chip-alumno:hover {
+    background: #EFF6FF;
+    border-color: #3B82F6;
+    color: #1D4ED8;
+    transform: translateY(-1px);
+}
+
+/* ---------------- PANEL DOCENTE (PORTAL PEDAGÓGICO) ---------------- */
+.pantalla-docente {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    animation: fadeIn 0.25s ease;
+}
+
+.banner-docente {
+    background: linear-gradient(135deg, var(--color-morado), #4C1D95);
+    border: var(--borde-cartoon);
+    border-radius: 20px;
+    padding: 22px 28px;
+    color: #FFFFFF;
+    box-shadow: var(--sombra-cartoon);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.badge-docente {
+    display: inline-block;
+    background: #F59E0B;
+    color: #1E1B2E;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    border: 1.5px solid #1E1B2E;
+    margin-bottom: 6px;
+}
+
+.banner-docente-info h2 {
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 4px;
+}
+
+.banner-docente-info p {
+    font-size: 13.5px;
+    color: #E2E8F0;
+    font-weight: 600;
+    max-width: 620px;
+}
+
+.banner-docente-acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-docente-accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    color: var(--color-trazo);
+    border: 2px solid var(--color-trazo);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--color-trazo);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-docente-accion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--color-trazo);
+}
+
+.btn-docente-accion:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--color-trazo);
+}
+
+.btn-docente-accion.principal {
+    background: #10B981;
+    color: #FFFFFF;
+    border-color: #064E3B;
+}
+
+.btn-docente-accion.salir {
+    background: #FEE2E2;
+    color: #DC2626;
+    border-color: #991B1B;
+}
+
+.grid-metricas-docente {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.tarjeta-metrica-docente {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 0 var(--color-trazo);
+}
+
+.metrica-icono {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 2px solid var(--color-trazo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.metrica-datos {
+    display: flex;
+    flex-direction: column;
+}
+
+.metrica-numero {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--color-trazo);
+    line-height: 1.1;
+}
+
+.metrica-etiqueta {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #64748B;
+    margin-top: 3px;
+}
+
+.barra-filtros-docente {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 16px;
+    padding: 12px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    box-shadow: 0 4px 0 var(--color-trazo);
+    flex-wrap: wrap;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filtro-item label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #475569;
+}
+
+.contenedor-tabla-docente {
+    background: #FFFFFF;
+    border: 2.5px solid var(--color-trazo);
+    border-radius: 16px;
+    overflow-x: auto;
+    box-shadow: var(--sombra-cartoon);
+}
+
+.tabla-docente {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.tabla-docente thead {
+    background: #F8FAFC;
+    border-bottom: 2.5px solid var(--color-trazo);
+}
+
+.tabla-docente th {
+    padding: 12px 14px;
+    font-weight: 900;
+    color: var(--color-trazo);
+    white-space: nowrap;
+}
+
+.tabla-docente td {
+    padding: 12px 14px;
+    border-bottom: 1.5px solid #E2E8F0;
+    color: #334155;
+    font-weight: 600;
+}
+
+.tabla-docente tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.barra-mini-tabla {
+    width: 60px;
+    height: 8px;
+    background: #E2E8F0;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 6px;
+}
+
+.barra-mini-fill {
+    height: 100%;
+    background: #10B981;
+    border-radius: 4px;
+}
+
+.btn-tabla-ver {
+    background: #EEF2FF;
+    border: 1.5px solid #4F46E5;
+    border-radius: 8px;
+    padding: 4px 10px;
+    color: #4338CA;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-tabla-ver:hover {
+    background: #4F46E5;
+    color: #FFFFFF;
+}
+
 /* ---------------- RESPONSIVIDAD PARA CELULAR ---------------- */
 @media (max-width: 850px) {
     .header-eco {

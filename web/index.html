@@ -23,7 +23,7 @@
         </div>
 
         <div class="header-controles">
-            <!-- Píldora de Perfil del Estudiante -->
+            <!-- Píldora de Perfil del Estudiante / Sesión activa -->
             <div class="pill-perfil" id="btnCambiarPerfil" title="Cambiar estudiante o editar perfil">
                 <div class="avatar-mini" id="avatarIcono">
                     <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
@@ -36,8 +36,23 @@
                 </div>
             </div>
 
+            <!-- Botón de Cerrar Sesión / Cambiar Alumno -->
+            <button class="btn-icono" id="btnCerrarSesion" title="Cambiar de alumno o salir">
+                <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+            </button>
+
+            <!-- Acceso al Portal Docente -->
+            <button class="btn-acceso-docente" id="btnAccesoDocente" title="Acceso al Portal del Docente">
+                <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                </svg>
+                <span id="textoBotonDocente">Docente</span>
+            </button>
+
             <!-- EcoMonedas -->
-            <div class="indicador-eco monedas" title="EcoMonedas acumuladas">
+            <div class="indicador-eco monedas" id="contenedorHeaderMonedas" title="EcoMonedas acumuladas">
                 <svg class="icono-svg" viewBox="0 0 24 24" style="color: #D97706;">
                     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/>
                     <circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
@@ -47,7 +62,7 @@
             </div>
 
             <!-- Estrellas Totales -->
-            <div class="indicador-eco estrellas" title="Estrellas obtenidas">
+            <div class="indicador-eco estrellas" id="contenedorHeaderEstrellas" title="Estrellas obtenidas">
                 <svg class="icono-svg" viewBox="0 0 24 24" style="color: #EAB308;">
                     <polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.7 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="currentColor" stroke="#2A2340" stroke-width="1.5" stroke-linejoin="round"/>
                 </svg>
@@ -255,52 +270,258 @@
             </div>
         </section>
 
+        <!-- 4. PANTALLA PANEL DOCENTE (EVALUACIÓN Y SEGUIMIENTO) -->
+        <section class="pantalla-docente" id="vistaDocente" style="display: none;">
+            <div class="banner-docente">
+                <div class="banner-docente-info">
+                    <div class="badge-docente">PORTAL PEDAGÓGICO</div>
+                    <h2>Panel de Evaluación y Seguimiento Docente</h2>
+                    <p>Monitoreo de competencias ambientales, logros alcanzados y métricas de impacto escolar en la provincia de Ica.</p>
+                </div>
+                <div class="banner-docente-acciones">
+                    <button class="btn-docente-accion principal" id="btnDescargarReporteDocente" title="Descargar registro en CSV para Excel o SIAGIE">
+                        <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Descargar Reporte (CSV)
+                    </button>
+                    <button class="btn-docente-accion" id="btnProbarModoAlumno" title="Volver al menú de juegos sin cerrar sesión">
+                        <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                        Ver Juegos
+                    </button>
+                    <button class="btn-docente-accion salir" id="btnCerrarSesionDocente" title="Cerrar la sesión de docente">
+                        <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                        </svg>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumen de 4 Métricas de Impacto del Salón -->
+            <div class="grid-metricas-docente">
+                <div class="tarjeta-metrica-docente">
+                    <div class="metrica-icono" style="background: #EFF6FF; color: #2563EB;">
+                        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <div class="metrica-datos">
+                        <span class="metrica-numero" id="docenteNumAlumnos">0</span>
+                        <span class="metrica-etiqueta">Alumnos Evaluados</span>
+                    </div>
+                </div>
+
+                <div class="tarjeta-metrica-docente">
+                    <div class="metrica-icono" style="background: #E0F2FE; color: #0284C7;">
+                        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 2.7C10.5 4.8 6 11.2 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-3.8-4.5-10.2-6-12.3z"/></svg>
+                    </div>
+                    <div class="metrica-datos">
+                        <span class="metrica-numero" id="docenteTotalAgua">0 L</span>
+                        <span class="metrica-etiqueta">Agua Preservada (Lavaderos)</span>
+                    </div>
+                </div>
+
+                <div class="tarjeta-metrica-docente">
+                    <div class="metrica-icono" style="background: #DCFCE7; color: #16A34A;">
+                        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M7 19c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V7H7v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </div>
+                    <div class="metrica-datos">
+                        <span class="metrica-numero" id="docenteTotalResiduos">0 kg</span>
+                        <span class="metrica-etiqueta">Residuos Clasificados (Plaza Ica)</span>
+                    </div>
+                </div>
+
+                <div class="tarjeta-metrica-docente">
+                    <div class="metrica-icono" style="background: #FEF3C7; color: #D97706;">
+                        <svg class="icono-svg" viewBox="0 0 24 24"><path d="M12 2C8 6 4 9 4 14c0 4.4 3.6 8 8 8s8-3.6 8-8c0-5-4-8-8-12zm-1 9V7h2v4h-2z"/></svg>
+                    </div>
+                    <div class="metrica-datos">
+                        <span class="metrica-numero" id="docenteTotalEnergiaBio">0</span>
+                        <span class="metrica-etiqueta">Ahorro Eléctrico & Biohuerto</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros de Búsqueda para el Docente -->
+            <div class="barra-filtros-docente">
+                <div class="filtro-item buscador" style="flex: 1;">
+                    <label for="buscarAlumnoDocente">Buscar Alumno por Nombre o DNI:</label>
+                    <input type="text" id="buscarAlumnoDocente" class="input-eco" placeholder="Ej: 74839201 o Mateo Quispe" autocomplete="off">
+                </div>
+                <div class="filtro-item" style="width: 170px;">
+                    <label for="filtroDocenteGrado">Grado:</label>
+                    <select id="filtroDocenteGrado" class="input-eco">
+                        <option value="">Todos los grados</option>
+                        <option value="1">1° Primaria</option>
+                        <option value="2">2° Primaria</option>
+                        <option value="3">3° Primaria</option>
+                        <option value="4">4° Primaria</option>
+                        <option value="5">5° Primaria</option>
+                        <option value="6">6° Primaria</option>
+                    </select>
+                </div>
+                <div class="filtro-item" style="width: 150px;">
+                    <label for="filtroDocenteSeccion">Sección:</label>
+                    <select id="filtroDocenteSeccion" class="input-eco">
+                        <option value="">Todas</option>
+                        <option value="A">Sección A</option>
+                        <option value="B">Sección B</option>
+                        <option value="C">Sección C</option>
+                        <option value="D">Sección D</option>
+                        <option value="UNICA">Única</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de Seguimiento de Alumnos -->
+            <div class="contenedor-tabla-docente">
+                <table class="tabla-docente" id="tablaDocenteAlumnos">
+                    <thead>
+                        <tr>
+                            <th>DNI / Código</th>
+                            <th>Estudiante</th>
+                            <th>Aula</th>
+                            <th title="Niveles y Estrellas en Limpieza">Limpieza</th>
+                            <th title="Niveles y Estrellas en Agua">Agua</th>
+                            <th title="Niveles y Estrellas en Energía">Energía</th>
+                            <th title="Niveles y Estrellas en Biohuerto">Biohuerto</th>
+                            <th>Estrellas</th>
+                            <th>Medallas</th>
+                            <th>Avance General</th>
+                            <th>Ficha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaDocente">
+                        <!-- Generado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
 
     <!-- ==================== MODALES ==================== -->
 
-    <!-- Modal 1: Registro / Selección de Estudiante -->
+    <!-- Modal 1: Portal de Acceso / Login (Estudiante & Docente) -->
     <div class="modal-overlay" id="modalRegistro">
-        <div class="modal-caja">
-            <div class="modal-cabecera">
-                <h3>Ficha del Estudiante</h3>
+        <div class="modal-caja" style="max-width: 540px; width: 95%;">
+            <!-- Pestañas de Cambio de Rol -->
+            <div class="tabs-login">
+                <button type="button" class="tab-login-btn activo" id="tabBtnEstudiante">
+                    <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8V21h19.2v-1.8c0-3.2-6.4-4.8-9.6-4.8z"/>
+                    </svg>
+                    Soy Estudiante
+                </button>
+                <button type="button" class="tab-login-btn" id="tabBtnDocente">
+                    <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                        <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                    </svg>
+                    Soy Docente
+                </button>
             </div>
-            <div class="modal-cuerpo">
-                <p style="font-size: 14.5px; color: #475569; font-weight: 600; line-height: 1.45;">
-                    Ingresa tus datos escolares para llevar el registro de tus niveles superados, estrellas obtenidas, medallas y EcoMonedas.
-                </p>
-                <form id="formRegistroEstudiante" style="display: flex; flex-direction: column; gap: 14px;">
-                    <div class="campo-form">
-                        <label for="inputNombre">Nombre y apellido del alumno:</label>
-                        <input type="text" id="inputNombre" placeholder="Ejemplo: Mateo Quispe" required autocomplete="name">
+
+            <!-- CONTENIDO TAB 1: ESTUDIANTE -->
+            <div id="panelLoginEstudiante" class="panel-login-tab activo">
+                <div class="modal-cuerpo" style="padding: 22px 24px;">
+                    <div style="text-align: center; margin-bottom: 14px;">
+                        <h3 style="font-size: 20px; font-weight: 900; color: var(--color-trazo); margin-bottom: 4px;">¡Bienvenido/a, Eco-Héroe!</h3>
+                        <p style="font-size: 13.5px; color: #64748B; font-weight: 600; line-height: 1.4;">
+                            Ingresa tu DNI o código de estudiante para comenzar tu misión ambiental en Ica.
+                        </p>
                     </div>
-                    <div style="display: flex; gap: 14px;">
-                        <div class="campo-form" style="flex: 1;">
-                            <label for="selectGrado">Grado:</label>
-                            <select id="selectGrado">
-                                <option value="1">1° Primaria</option>
-                                <option value="2">2° Primaria</option>
-                                <option value="3">3° Primaria</option>
-                                <option value="4">4° Primaria</option>
-                                <option value="5" selected>5° Primaria</option>
-                                <option value="6">6° Primaria</option>
-                            </select>
+
+                    <!-- Mensaje dinámico de alumno reconocido -->
+                    <div id="alertaAlumnoReconocido" class="alerta-reconocido" style="display: none;">
+                        <svg class="icono-svg" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #16A34A; flex-shrink: 0;">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                        <span id="textoAlumnoReconocido">¡Hola! Encontramos tu perfil guardado.</span>
+                    </div>
+
+                    <form id="formRegistroEstudiante" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="campo-form">
+                            <label for="inputCodigoEstudiante">DNI o Código de Estudiante:</label>
+                            <input type="text" id="inputCodigoEstudiante" placeholder="Ej: 74839201 o tu código escolar" maxlength="15" autocomplete="off" required>
+                            <span style="font-size: 11px; color: #64748B; margin-top: 3px; font-weight: 600;">Ingresa tu DNI de 8 números o el código que te dio tu profesor.</span>
                         </div>
-                        <div class="campo-form" style="flex: 1;">
-                            <label for="selectSeccion">Sección:</label>
-                            <select id="selectSeccion">
-                                <option value="A" selected>Sección A</option>
-                                <option value="B">Sección B</option>
-                                <option value="C">Sección C</option>
-                                <option value="D">Sección D</option>
-                                <option value="UNICA">Única</option>
-                            </select>
+
+                        <div class="campo-form">
+                            <label for="inputNombre">Nombre y apellido del alumno:</label>
+                            <input type="text" id="inputNombre" placeholder="Ej: Mateo Quispe" required autocomplete="name">
+                        </div>
+
+                        <div style="display: flex; gap: 14px;">
+                            <div class="campo-form" style="flex: 1;">
+                                <label for="selectGrado">Grado:</label>
+                                <select id="selectGrado">
+                                    <option value="1">1° Primaria</option>
+                                    <option value="2">2° Primaria</option>
+                                    <option value="3">3° Primaria</option>
+                                    <option value="4">4° Primaria</option>
+                                    <option value="5" selected>5° Primaria</option>
+                                    <option value="6">6° Primaria</option>
+                                </select>
+                            </div>
+                            <div class="campo-form" style="flex: 1;">
+                                <label for="selectSeccion">Sección:</label>
+                                <select id="selectSeccion">
+                                    <option value="A" selected>Sección A</option>
+                                    <option value="B">Sección B</option>
+                                    <option value="C">Sección C</option>
+                                    <option value="D">Sección D</option>
+                                    <option value="UNICA">Única</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-principal" id="btnSubmitEstudiante" style="margin-top: 6px;">
+                            Comenzar Misión
+                        </button>
+                    </form>
+
+                    <!-- Lista de Alumnos Guardados en este Equipo -->
+                    <div id="seccionAlumnosGuardados" style="margin-top: 18px; border-top: 2px dashed #E2E8F0; padding-top: 14px;">
+                        <span style="font-size: 12px; font-weight: 800; color: #64748B; display: block; margin-bottom: 8px;">Alumnos guardados en este equipo:</span>
+                        <div class="lista-chips-alumnos" id="contenedorChipsAlumnos">
+                            <!-- Chips generados dinámicamente -->
                         </div>
                     </div>
-                    <button type="submit" class="btn-principal" style="margin-top: 8px;">
-                        Comenzar Misión
-                    </button>
-                </form>
+                </div>
+            </div>
+
+            <!-- CONTENIDO TAB 2: DOCENTE -->
+            <div id="panelLoginDocente" class="panel-login-tab" style="display: none;">
+                <div class="modal-cuerpo" style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 20px; font-weight: 900; color: var(--color-trazo); margin-bottom: 4px;">Acceso para Docentes</h3>
+                        <p style="font-size: 13.5px; color: #64748B; font-weight: 600; line-height: 1.4;">
+                            Ingresa al portal pedagógico para monitorear el progreso de tus alumnos y descargar informes en CSV.
+                        </p>
+                    </div>
+
+                    <form id="formLoginDocente" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="campo-form">
+                            <label for="inputUsuarioDocente">Usuario o DNI del Docente:</label>
+                            <input type="text" id="inputUsuarioDocente" placeholder="Ej: profesor o DNI institucional" required autocomplete="username">
+                        </div>
+
+                        <div class="campo-form">
+                            <label for="inputClaveDocente">Contraseña institucional:</label>
+                            <input type="password" id="inputClaveDocente" placeholder="Ingresa tu clave de acceso" required autocomplete="current-password">
+                            <span style="font-size: 11.5px; color: #64748B; margin-top: 3px; font-weight: 600;">(Clave de acceso predeterminada: <code>docente2026</code>)</span>
+                        </div>
+
+                        <div id="errorLoginDocente" style="display: none; padding: 10px 14px; background: #FEF2F2; border: 2px solid #EF4444; border-radius: 12px; color: #DC2626; font-size: 13px; font-weight: 700; text-align: center;">
+                            Clave incorrecta. Clave de acceso: <strong>docente2026</strong>
+                        </div>
+
+                        <button type="submit" class="btn-principal" style="background: var(--color-morado); color: #FFFFFF; margin-top: 6px;">
+                            Ingresar al Panel Docente
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -434,6 +655,19 @@
                 <div style="margin-top: 16px; background: #F1F5F9; border: 2px dashed #94A3B8; border-radius: 14px; padding: 12px 16px; font-size: 12.5px; color: #475569; line-height: 1.4;">
                     <strong>¿Por qué importa en Ica?</strong> Nuestra región afronta un estrés hídrico desértico elevado y alta radiación solar. Ahorrar agua, desconectar consumos fantasma y cultivar biohuertos genera un impacto escolar directo y medible.
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Ficha Pedagógica del Alumno (Para el Docente) -->
+    <div class="modal-overlay" id="modalFichaAlumno">
+        <div class="modal-caja" style="max-width: 640px; width: 95%;">
+            <div class="modal-cabecera" style="background: var(--color-morado);">
+                <h3 id="fichaAlumnoTitulo">Ficha del Estudiante</h3>
+                <button class="btn-cerrar-modal" id="btnCerrarFichaAlumno">✕</button>
+            </div>
+            <div class="modal-cuerpo" id="cuerpoFichaAlumno" style="max-height: 78vh; overflow-y: auto; padding: 20px;">
+                <!-- Se llena dinámicamente -->
             </div>
         </div>
     </div>

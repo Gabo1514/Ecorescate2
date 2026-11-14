@@ -35,6 +35,7 @@ class AppEcoRescate {
         this.vistaMenu = document.getElementById('vistaMenu');
         this.vistaMapa = document.getElementById('vistaMapa');
         this.vistaJuego = document.getElementById('vistaJuego');
+        this.vistaDocente = document.getElementById('vistaDocente');
 
         this.headerNombre = document.getElementById('headerNombre');
         this.headerGrado = document.getElementById('headerGrado');
@@ -43,11 +44,52 @@ class AppEcoRescate {
         this.btnSonidoToggle = document.getElementById('btnSonidoToggle');
         this.avatarIcono = document.getElementById('avatarIcono');
 
+        this.btnAccesoDocente = document.getElementById('btnAccesoDocente');
+        this.btnCerrarSesion = document.getElementById('btnCerrarSesion');
+        this.textoBotonDocente = document.getElementById('textoBotonDocente');
+
         this.modalRegistro = document.getElementById('modalRegistro');
         this.modalTienda = document.getElementById('modalTienda');
         this.modalMedallas = document.getElementById('modalMedallas');
         this.modalRanking = document.getElementById('modalRanking');
         this.modalImpacto = document.getElementById('modalImpacto');
+        this.modalFichaAlumno = document.getElementById('modalFichaAlumno');
+
+        // Elementos de Login y Registro
+        this.tabBtnEstudiante = document.getElementById('tabBtnEstudiante');
+        this.tabBtnDocente = document.getElementById('tabBtnDocente');
+        this.panelLoginEstudiante = document.getElementById('panelLoginEstudiante');
+        this.panelLoginDocente = document.getElementById('panelLoginDocente');
+        this.inputCodigoEstudiante = document.getElementById('inputCodigoEstudiante');
+        this.inputNombre = document.getElementById('inputNombre');
+        this.selectGrado = document.getElementById('selectGrado');
+        this.selectSeccion = document.getElementById('selectSeccion');
+        this.alertaAlumnoReconocido = document.getElementById('alertaAlumnoReconocido');
+        this.textoAlumnoReconocido = document.getElementById('textoAlumnoReconocido');
+        this.contenedorChipsAlumnos = document.getElementById('contenedorChipsAlumnos');
+
+        this.formLoginDocente = document.getElementById('formLoginDocente');
+        this.inputUsuarioDocente = document.getElementById('inputUsuarioDocente');
+        this.inputClaveDocente = document.getElementById('inputClaveDocente');
+        this.errorLoginDocente = document.getElementById('errorLoginDocente');
+
+        // Elementos del Panel Docente
+        this.btnDescargarReporteDocente = document.getElementById('btnDescargarReporteDocente');
+        this.btnProbarModoAlumno = document.getElementById('btnProbarModoAlumno');
+        this.btnCerrarSesionDocente = document.getElementById('btnCerrarSesionDocente');
+        this.buscarAlumnoDocente = document.getElementById('buscarAlumnoDocente');
+        this.filtroDocenteGrado = document.getElementById('filtroDocenteGrado');
+        this.filtroDocenteSeccion = document.getElementById('filtroDocenteSeccion');
+        this.cuerpoTablaDocente = document.getElementById('cuerpoTablaDocente');
+        this.docenteNumAlumnos = document.getElementById('docenteNumAlumnos');
+        this.docenteTotalAgua = document.getElementById('docenteTotalAgua');
+        this.docenteTotalResiduos = document.getElementById('docenteTotalResiduos');
+        this.docenteTotalEnergiaBio = document.getElementById('docenteTotalEnergiaBio');
+
+        // Elementos de Ficha Alumno
+        this.fichaAlumnoTitulo = document.getElementById('fichaAlumnoTitulo');
+        this.cuerpoFichaAlumno = document.getElementById('cuerpoFichaAlumno');
+        this.btnCerrarFichaAlumno = document.getElementById('btnCerrarFichaAlumno');
     }
 
     vincularEventos() {
@@ -57,11 +99,37 @@ class AppEcoRescate {
             this.mostrarMenuPrincipal();
         });
 
-        // Cambiar perfil
+        // Cambiar perfil o login
         document.getElementById('btnCambiarPerfil').addEventListener('click', () => {
             window.audioEco.clic();
-            this.abrirModalRegistro();
+            if (window.storageEco.esSesionDocente()) {
+                this.mostrarPanelDocente();
+            } else {
+                this.abrirModalRegistro('ESTUDIANTE');
+            }
         });
+
+        // Botón cerrar sesión / cambiar alumno
+        if (this.btnCerrarSesion) {
+            this.btnCerrarSesion.addEventListener('click', () => {
+                window.audioEco.clic();
+                window.storageEco.cerrarSesionEstudiante();
+                window.storageEco.cerrarSesionDocente();
+                this.abrirModalRegistro('ESTUDIANTE');
+            });
+        }
+
+        // Acceso Docente desde el header
+        if (this.btnAccesoDocente) {
+            this.btnAccesoDocente.addEventListener('click', () => {
+                window.audioEco.clic();
+                if (window.storageEco.esSesionDocente()) {
+                    this.mostrarPanelDocente();
+                } else {
+                    this.abrirModalRegistro('DOCENTE');
+                }
+            });
+        }
 
         // Toggle sonido
         this.btnSonidoToggle.addEventListener('click', () => {
@@ -70,11 +138,100 @@ class AppEcoRescate {
             if (activo) window.audioEco.clic();
         });
 
-        // Formulario de registro de estudiante
+        // Pestañas del modal de login
+        if (this.tabBtnEstudiante) {
+            this.tabBtnEstudiante.addEventListener('click', () => {
+                window.audioEco.clic();
+                this.activarTabLogin('ESTUDIANTE');
+            });
+        }
+        if (this.tabBtnDocente) {
+            this.tabBtnDocente.addEventListener('click', () => {
+                window.audioEco.clic();
+                this.activarTabLogin('DOCENTE');
+            });
+        }
+
+        // Reconocimiento inteligente al ingresar DNI o Código de Estudiante
+        if (this.inputCodigoEstudiante) {
+            const manejarReconocimiento = () => {
+                const codigo = this.inputCodigoEstudiante.value.trim();
+                if (!codigo) {
+                    if (this.alertaAlumnoReconocido) this.alertaAlumnoReconocido.style.display = 'none';
+                    return;
+                }
+                const hallado = window.storageEco.buscarEstudiante(codigo);
+                if (hallado) {
+                    const p = hallado.perfil;
+                    if (this.inputNombre) this.inputNombre.value = p.nombre;
+                    if (this.selectGrado) this.selectGrado.value = String(p.grado);
+                    if (this.selectSeccion) this.selectSeccion.value = p.seccion;
+                    if (this.alertaAlumnoReconocido && this.textoAlumnoReconocido) {
+                        const totalEst = window.storageEco.totalEstrellasGeneral(p);
+                        this.textoAlumnoReconocido.textContent = `¡Hola de nuevo, ${p.nombre}! Tienes ${totalEst} estrellas guardadas.`;
+                        this.alertaAlumnoReconocido.style.display = 'flex';
+                    }
+                } else {
+                    if (this.alertaAlumnoReconocido) this.alertaAlumnoReconocido.style.display = 'none';
+                }
+            };
+            this.inputCodigoEstudiante.addEventListener('input', manejarReconocimiento);
+            this.inputCodigoEstudiante.addEventListener('change', manejarReconocimiento);
+        }
+
+        // Formulario de registro/login de estudiante
         document.getElementById('formRegistroEstudiante').addEventListener('submit', (e) => {
             e.preventDefault();
             this.guardarRegistroEstudiante();
         });
+
+        // Formulario de login de docente
+        if (this.formLoginDocente) {
+            this.formLoginDocente.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.procesarLoginDocente();
+            });
+        }
+
+        // Botones del Panel Docente
+        if (this.btnDescargarReporteDocente) {
+            this.btnDescargarReporteDocente.addEventListener('click', () => {
+                window.audioEco.moneda();
+                window.storageEco.exportarCSV();
+            });
+        }
+        if (this.btnProbarModoAlumno) {
+            this.btnProbarModoAlumno.addEventListener('click', () => {
+                window.audioEco.clic();
+                this.mostrarMenuPrincipal();
+            });
+        }
+        if (this.btnCerrarSesionDocente) {
+            this.btnCerrarSesionDocente.addEventListener('click', () => {
+                window.audioEco.clic();
+                window.storageEco.cerrarSesionDocente();
+                this.abrirModalRegistro('DOCENTE');
+            });
+        }
+
+        // Filtros del Panel Docente
+        if (this.buscarAlumnoDocente) {
+            this.buscarAlumnoDocente.addEventListener('input', () => this.renderizarPanelDocente());
+        }
+        if (this.filtroDocenteGrado) {
+            this.filtroDocenteGrado.addEventListener('change', () => this.renderizarPanelDocente());
+        }
+        if (this.filtroDocenteSeccion) {
+            this.filtroDocenteSeccion.addEventListener('change', () => this.renderizarPanelDocente());
+        }
+
+        // Cerrar Ficha Alumno
+        if (this.btnCerrarFichaAlumno) {
+            this.btnCerrarFichaAlumno.addEventListener('click', () => {
+                window.audioEco.clic();
+                this.cerrarModal(this.modalFichaAlumno);
+            });
+        }
 
         // Clic en tarjetas de minijuegos
         document.querySelectorAll('.tarjeta-juego').forEach(tarjeta => {
@@ -164,9 +321,16 @@ class AppEcoRescate {
     }
 
     comprobarEstudiante() {
+        if (window.storageEco.esSesionDocente()) {
+            this.actualizarHeader();
+            this.mostrarPanelDocente();
+            this.actualizarBotonSonido(window.audioEco.activo);
+            return;
+        }
+
         const activo = window.storageEco.cargarEstudianteActivo();
         if (!activo || !activo.nombre) {
-            this.abrirModalRegistro();
+            this.abrirModalRegistro('ESTUDIANTE');
         } else {
             this.actualizarHeader();
             this.mostrarMenuPrincipal();
@@ -186,24 +350,81 @@ class AppEcoRescate {
         `;
     }
 
-    abrirModalRegistro() {
+    activarTabLogin(tab = 'ESTUDIANTE') {
+        const esEst = tab === 'ESTUDIANTE';
+        if (this.tabBtnEstudiante) this.tabBtnEstudiante.classList.toggle('activo', esEst);
+        if (this.tabBtnDocente) this.tabBtnDocente.classList.toggle('activo', !esEst);
+        if (this.panelLoginEstudiante) this.panelLoginEstudiante.style.display = esEst ? 'block' : 'none';
+        if (this.panelLoginDocente) this.panelLoginDocente.style.display = esEst ? 'none' : 'block';
+        if (this.errorLoginDocente) this.errorLoginDocente.style.display = 'none';
+    }
+
+    abrirModalRegistro(tabInicial = 'ESTUDIANTE') {
+        this.activarTabLogin(tabInicial);
+
         const activo = window.storageEco.cargarEstudianteActivo();
         if (activo) {
-            document.getElementById('inputNombre').value = activo.nombre || '';
-            document.getElementById('selectGrado').value = activo.grado || '5';
-            document.getElementById('selectSeccion').value = activo.seccion || 'A';
+            if (this.inputCodigoEstudiante) this.inputCodigoEstudiante.value = activo.dni || activo.codigo || '';
+            if (this.inputNombre) this.inputNombre.value = activo.nombre || '';
+            if (this.selectGrado) this.selectGrado.value = String(activo.grado || '5');
+            if (this.selectSeccion) this.selectSeccion.value = activo.seccion || 'A';
+            if (this.alertaAlumnoReconocido) this.alertaAlumnoReconocido.style.display = 'none';
         }
+
+        // Renderizar lista rápida de alumnos guardados en este equipo
+        if (this.contenedorChipsAlumnos) {
+            const recientes = window.storageEco.listarAlumnosRecientes();
+            this.contenedorChipsAlumnos.innerHTML = '';
+            if (recientes.length === 0) {
+                this.contenedorChipsAlumnos.innerHTML = '<span style="font-size: 11.5px; color: #94A3B8;">No hay perfiles previos en este equipo.</span>';
+            } else {
+                recientes.forEach(al => {
+                    const chip = document.createElement('div');
+                    chip.className = 'chip-alumno';
+                    chip.title = `DNI: ${al.dni || al.codigo || 'S/DNI'} - ${al.estrellas} estrellas`;
+                    chip.innerHTML = `
+                        <span style="background: #E2E8F0; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900;">
+                            ${al.nombre.charAt(0)}
+                        </span>
+                        <span>${al.nombre} (${al.grado}° ${al.seccion})</span>
+                        <span style="color: #EAB308; font-weight: 800; font-size: 10.5px;">★${al.estrellas}</span>
+                    `;
+                    chip.addEventListener('click', () => {
+                        window.audioEco.clic();
+                        if (this.inputCodigoEstudiante) this.inputCodigoEstudiante.value = al.dni || al.codigo || '';
+                        if (this.inputNombre) this.inputNombre.value = al.nombre;
+                        if (this.selectGrado) this.selectGrado.value = String(al.grado);
+                        if (this.selectSeccion) this.selectSeccion.value = al.seccion;
+                        if (this.alertaAlumnoReconocido && this.textoAlumnoReconocido) {
+                            this.textoAlumnoReconocido.textContent = `¡Hola, ${al.nombre}! Tienes ${al.estrellas} estrellas guardadas.`;
+                            this.alertaAlumnoReconocido.style.display = 'flex';
+                        }
+                    });
+                    this.contenedorChipsAlumnos.appendChild(chip);
+                });
+            }
+        }
+
         this.modalRegistro.classList.add('activo');
     }
 
     guardarRegistroEstudiante() {
-        const nombre = document.getElementById('inputNombre').value.trim();
-        const grado = parseInt(document.getElementById('selectGrado').value, 10);
-        const seccion = document.getElementById('selectSeccion').value;
+        const codigo = this.inputCodigoEstudiante ? this.inputCodigoEstudiante.value.trim() : '';
+        const nombre = this.inputNombre.value.trim();
+        const grado = parseInt(this.selectGrado.value, 10);
+        const seccion = this.selectSeccion.value;
 
         if (!nombre) return;
 
-        const estudiante = { nombre, grado, seccion };
+        const estudiante = {
+            dni: codigo,
+            codigo: codigo,
+            nombre,
+            grado,
+            seccion
+        };
+
+        window.storageEco.cerrarSesionDocente();
         window.storageEco.establecerEstudianteActivo(estudiante);
         this.modalRegistro.classList.remove('activo');
         window.audioEco.nivel();
@@ -212,12 +433,40 @@ class AppEcoRescate {
         this.mostrarMenuPrincipal();
     }
 
+    procesarLoginDocente() {
+        const usuario = this.inputUsuarioDocente ? this.inputUsuarioDocente.value.trim() : 'Docente';
+        const clave = this.inputClaveDocente ? this.inputClaveDocente.value.trim() : '';
+
+        const exito = window.storageEco.iniciarSesionDocente(usuario, clave);
+        if (exito) {
+            window.audioEco.nivel();
+            this.modalRegistro.classList.remove('activo');
+            if (this.errorLoginDocente) this.errorLoginDocente.style.display = 'none';
+            this.mostrarPanelDocente();
+        } else {
+            window.audioEco.error();
+            if (this.errorLoginDocente) this.errorLoginDocente.style.display = 'block';
+        }
+    }
+
     actualizarHeader() {
+        if (window.storageEco.esSesionDocente()) {
+            this.headerNombre.textContent = window.storageEco.sesionDocente.usuario;
+            this.headerGrado.textContent = 'Docente / Administrador';
+            if (this.textoBotonDocente) this.textoBotonDocente.textContent = 'Panel Docente';
+            if (this.btnAccesoDocente) this.btnAccesoDocente.classList.add('activo');
+            return;
+        }
+
+        if (this.textoBotonDocente) this.textoBotonDocente.textContent = 'Docente';
+        if (this.btnAccesoDocente) this.btnAccesoDocente.classList.remove('activo');
+
         const perfil = window.storageEco.obtenerPerfil();
         if (!perfil) return;
 
         this.headerNombre.textContent = perfil.nombre;
-        this.headerGrado.textContent = `${perfil.grado}° "${perfil.seccion}" Primaria`;
+        const dniTexto = (perfil.dni || perfil.codigo) ? ` • DNI: ${perfil.dni || perfil.codigo}` : '';
+        this.headerGrado.textContent = `${perfil.grado}° "${perfil.seccion}" Primaria${dniTexto}`;
         this.headerMonedas.textContent = perfil.monedas || 0;
 
         const totalEstrellas = window.storageEco.totalEstrellasGeneral(perfil);
@@ -254,6 +503,7 @@ class AppEcoRescate {
         this.vistaMenu.style.display = 'flex';
         this.vistaMapa.style.display = 'none';
         this.vistaJuego.style.display = 'none';
+        if (this.vistaDocente) this.vistaDocente.style.display = 'none';
         this.actualizarHeader();
     }
 
@@ -274,6 +524,191 @@ class AppEcoRescate {
         this.vistaMenu.style.display = 'none';
         this.vistaMapa.style.display = 'flex';
         this.vistaJuego.style.display = 'none';
+        if (this.vistaDocente) this.vistaDocente.style.display = 'none';
+    }
+
+    mostrarPanelDocente() {
+        if (this.instanciaJuego) {
+            this.instanciaJuego.detener();
+            this.instanciaJuego = null;
+        }
+        this.vistaMenu.style.display = 'none';
+        this.vistaMapa.style.display = 'none';
+        this.vistaJuego.style.display = 'none';
+        if (this.vistaDocente) this.vistaDocente.style.display = 'flex';
+        this.renderizarPanelDocente();
+        this.actualizarHeader();
+    }
+
+    renderizarPanelDocente() {
+        const grado = this.filtroDocenteGrado ? this.filtroDocenteGrado.value : '';
+        const seccion = this.filtroDocenteSeccion ? this.filtroDocenteSeccion.value : '';
+        const busqueda = this.buscarAlumnoDocente ? this.buscarAlumnoDocente.value : '';
+
+        const reporte = window.storageEco.obtenerReporteDocente(grado, seccion, busqueda);
+
+        if (this.docenteNumAlumnos) this.docenteNumAlumnos.textContent = `${reporte.metricas.totalAlumnos} Alumnos`;
+        if (this.docenteTotalAgua) this.docenteTotalAgua.textContent = `${reporte.metricas.totalLitrosAgua.toLocaleString()} L`;
+        if (this.docenteTotalResiduos) this.docenteTotalResiduos.textContent = `${reporte.metricas.totalResiduos.toLocaleString()} kg`;
+        if (this.docenteTotalEnergiaBio) this.docenteTotalEnergiaBio.textContent = `${reporte.metricas.totalKwhEnergia} kWh / ${reporte.metricas.totalAreaVerde} m²`;
+
+        if (!this.cuerpoTablaDocente) return;
+        this.cuerpoTablaDocente.innerHTML = '';
+
+        if (reporte.alumnos.length === 0) {
+            this.cuerpoTablaDocente.innerHTML = `
+                <tr>
+                    <td colspan="11" style="text-align: center; padding: 24px; color: #64748B;">
+                        No se encontraron estudiantes para los filtros seleccionados.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        reporte.alumnos.forEach((a) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight: 800; font-family: monospace; color: #475569;">${a.dni}</td>
+                <td>
+                    <div style="font-weight: 800; color: #1E1B2E;">${a.nombre}</div>
+                    <div style="font-size: 11px; color: #64748B;">${a.totalPartidas} partidas registradas</div>
+                </td>
+                <td><span class="puesto-badge puesto-otro">${a.grado}° "${a.seccion}"</span></td>
+                <td>
+                    <span>${a.nivelesLimpieza}/10</span>
+                    <span style="color: #EAB308; font-weight: 800; font-size: 11.5px; margin-left: 3px;">★${a.estrellasLimpieza}</span>
+                </td>
+                <td>
+                    <span>${a.nivelesAgua}/10</span>
+                    <span style="color: #EAB308; font-weight: 800; font-size: 11.5px; margin-left: 3px;">★${a.estrellasAgua}</span>
+                </td>
+                <td>
+                    <span>${a.nivelesEnergia}/10</span>
+                    <span style="color: #EAB308; font-weight: 800; font-size: 11.5px; margin-left: 3px;">★${a.estrellasEnergia}</span>
+                </td>
+                <td>
+                    <span>${a.nivelesVerde}/10</span>
+                    <span style="color: #EAB308; font-weight: 800; font-size: 11.5px; margin-left: 3px;">★${a.estrellasVerde}</span>
+                </td>
+                <td style="font-weight: 900; color: #B45309;">
+                    ★ ${a.totalEstrellas} / 120
+                </td>
+                <td style="font-weight: 800; color: #6B21A8;">
+                    ${a.medallas} / 14
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-weight: 800; width: 34px;">${a.avancePct}%</span>
+                        <div class="barra-mini-tabla">
+                            <div class="barra-mini-fill" style="width: ${a.avancePct}%;"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn-tabla-ver" data-clave="${a.clave}">Ficha</button>
+                </td>
+            `;
+
+            const btnVer = tr.querySelector('.btn-tabla-ver');
+            btnVer.addEventListener('click', () => {
+                window.audioEco.clic();
+                this.abrirFichaAlumno(a.clave);
+            });
+
+            this.cuerpoTablaDocente.appendChild(tr);
+        });
+    }
+
+    abrirFichaAlumno(clave) {
+        const perfil = window.storageEco.perfiles[clave];
+        if (!perfil) return;
+
+        if (this.fichaAlumnoTitulo) this.fichaAlumnoTitulo.textContent = `Ficha Pedagógica: ${perfil.nombre}`;
+        const impacto = window.storageEco.obtenerImpacto(perfil);
+        const totalEstrellas = window.storageEco.totalEstrellasGeneral(perfil);
+        const totalNiveles = window.storageEco.totalNivelesSuperados(perfil);
+
+        let partidasHtml = '';
+        const partidasRecientes = (perfil.partidas || []).slice(-8).reverse();
+        if (partidasRecientes.length === 0) {
+            partidasHtml = '<p style="color: #64748B; font-size: 13px; text-align: center; padding: 12px;">No hay partidas registradas aún.</p>';
+        } else {
+            partidasHtml = `
+                <table style="width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 8px;">
+                    <thead>
+                        <tr style="background: #F1F5F9; text-align: left;">
+                            <th style="padding: 6px 8px;">Fecha</th>
+                            <th style="padding: 6px 8px;">Misión</th>
+                            <th style="padding: 6px 8px;">Nivel</th>
+                            <th style="padding: 6px 8px;">Puntaje</th>
+                            <th style="padding: 6px 8px;">Aciertos</th>
+                            <th style="padding: 6px 8px;">Pregunta Ica</th>
+                            <th style="padding: 6px 8px;">★</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${partidasRecientes.map(p => `
+                            <tr style="border-bottom: 1px solid #E2E8F0;">
+                                <td style="padding: 6px 8px;">${p.fecha.slice(5, 16)}</td>
+                                <td style="padding: 6px 8px; font-weight: 700;">${p.minijuego || p.juegoId}</td>
+                                <td style="padding: 6px 8px;">Nivel ${p.nivel}</td>
+                                <td style="padding: 6px 8px; font-weight: 800;">${p.puntaje}</td>
+                                <td style="padding: 6px 8px;">${p.aciertos}/${p.aciertos + (p.errores || 0)}</td>
+                                <td style="padding: 6px 8px; color: ${p.preguntaCorrecta ? '#15803D' : '#DC2626'}; font-weight: 800;">
+                                    ${p.preguntaCorrecta ? 'Correcta (+30)' : 'Incorrecta'}
+                                </td>
+                                <td style="padding: 6px 8px; color: #EAB308; font-weight: 800;">★${p.estrellas}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        if (this.cuerpoFichaAlumno) {
+            this.cuerpoFichaAlumno.innerHTML = `
+                <div style="display: flex; gap: 16px; align-items: center; background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 14px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div style="background: var(--color-morado); color: white; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900;">
+                        ${perfil.nombre.charAt(0)}
+                    </div>
+                    <div>
+                        <h4 style="font-size: 17px; font-weight: 900; color: #1E1B2E; margin: 0;">${perfil.nombre}</h4>
+                        <div style="font-size: 13px; color: #64748B; font-weight: 700; margin-top: 2px;">
+                            DNI/Código: <strong>${perfil.dni || perfil.codigo || 'S/DNI'}</strong> • ${perfil.grado}° "${perfil.seccion}" Primaria
+                        </div>
+                    </div>
+                    <div style="margin-left: auto; text-align: right;">
+                        <div style="font-size: 18px; font-weight: 900; color: #B45309;">★ ${totalEstrellas} / 120</div>
+                        <div style="font-size: 12px; color: #15803D; font-weight: 800;">${totalNiveles} de 40 niveles superados</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+                    <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 10px; padding: 10px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: #1E40AF;">LIMPIEZA</div>
+                        <div style="font-size: 14px; font-weight: 900; color: #1E3A8A; margin-top: 2px;">${impacto.LIMPIEZA} kg</div>
+                    </div>
+                    <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 10px; padding: 10px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: #166534;">AGUA</div>
+                        <div style="font-size: 14px; font-weight: 900; color: #14532D; margin-top: 2px;">${impacto.AGUA} L</div>
+                    </div>
+                    <div style="background: #FEF3C7; border: 1.5px solid #FDE68A; border-radius: 10px; padding: 10px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: #92400E;">ENERGÍA</div>
+                        <div style="font-size: 14px; font-weight: 900; color: #78350F; margin-top: 2px;">${impacto.ENERGIA} kWh</div>
+                    </div>
+                    <div style="background: #FAF5FF; border: 1.5px solid #E9D5FF; border-radius: 10px; padding: 10px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: #6B21A8;">BIOHUERTO</div>
+                        <div style="font-size: 14px; font-weight: 900; color: #581C87; margin-top: 2px;">${impacto.VERDE} m²</div>
+                    </div>
+                </div>
+
+                <h5 style="font-size: 14px; font-weight: 800; color: #334155; margin-bottom: 6px;">Historial Reciente de Misiones Evaluadas</h5>
+                ${partidasHtml}
+            `;
+        }
+
+        if (this.modalFichaAlumno) this.modalFichaAlumno.classList.add('activo');
     }
 
     construirGridNiveles(juegoId) {

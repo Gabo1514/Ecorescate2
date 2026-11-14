@@ -7,8 +7,11 @@ class GestorAlmacenamiento {
     constructor() {
         this.CLAVE_PERFILES = 'ecorescate_perfiles_v1';
         this.CLAVE_ACTIVO = 'ecorescate_estudiante_activo_v1';
+        this.CLAVE_DOCENTE = 'ecorescate_docente_sesion_v1';
         this.perfiles = this.cargarPerfiles();
+        this.inicializarDatosReferencia();
         this.estudianteActivo = this.cargarEstudianteActivo();
+        this.sesionDocente = this.cargarSesionDocente();
     }
 
     cargarPerfiles() {
@@ -29,6 +32,46 @@ class GestorAlmacenamiento {
         }
     }
 
+    inicializarDatosReferencia() {
+        // Sembrar alumnos de ejemplo para que el docente y las aulas tengan datos iniciales
+        if (Object.keys(this.perfiles).length > 1) return;
+
+        const base = [
+            { dni: '74839201', nombre: 'Mateo Quispe', grado: 5, seccion: 'A', monedas: 248, accesorio: 'GORRA', polo: 1, estrellas: { LIMPIEZA: [3,3,3,3,2,3,2,3,2,0], AGUA: [3,3,3,2,3,2,0,0,0,0], ENERGIA: [3,3,2,2,0,0,0,0,0,0], VERDE: [3,3,2,0,0,0,0,0,0,0] } },
+            { dni: '71234567', nombre: 'Camila Huamán', grado: 5, seccion: 'A', monedas: 310, accesorio: 'CORONA', polo: 2, estrellas: { LIMPIEZA: [3,3,3,3,3,3,3,3,2,2], AGUA: [3,3,3,3,3,2,2,0,0,0], ENERGIA: [3,3,3,2,2,0,0,0,0,0], VERDE: [3,3,3,2,0,0,0,0,0,0] } },
+            { dni: '72345678', nombre: 'Luciana Flores', grado: 5, seccion: 'A', monedas: 180, accesorio: 'LENTES', polo: 0, estrellas: { LIMPIEZA: [3,3,3,2,2,2,0,0,0,0], AGUA: [3,3,3,3,2,0,0,0,0,0], ENERGIA: [3,2,2,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
+            { dni: '73456789', nombre: 'Diego Mendoza', grado: 5, seccion: 'B', monedas: 140, accesorio: 'VISERA', polo: 3, estrellas: { LIMPIEZA: [3,3,2,2,0,0,0,0,0,0], AGUA: [3,3,2,0,0,0,0,0,0,0], ENERGIA: [3,2,0,0,0,0,0,0,0,0], VERDE: [2,2,0,0,0,0,0,0,0,0] } },
+            { dni: '75678901', nombre: 'Valeria Ramos', grado: 5, seccion: 'B', monedas: 120, accesorio: 'NINGUNO', polo: 4, estrellas: { LIMPIEZA: [3,3,2,0,0,0,0,0,0,0], AGUA: [3,2,0,0,0,0,0,0,0,0], ENERGIA: [2,2,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } },
+            { dni: '76789012', nombre: 'Sebastián Rojas', grado: 6, seccion: 'A', monedas: 195, accesorio: 'SOMBRERO', polo: 0, estrellas: { LIMPIEZA: [3,3,3,3,2,0,0,0,0,0], AGUA: [3,3,3,2,0,0,0,0,0,0], ENERGIA: [3,3,0,0,0,0,0,0,0,0], VERDE: [3,2,0,0,0,0,0,0,0,0] } },
+            { dni: '77890123', nombre: 'Andrea Gutiérrez', grado: 4, seccion: 'A', monedas: 90, accesorio: 'NINGUNO', polo: 1, estrellas: { LIMPIEZA: [3,2,2,0,0,0,0,0,0,0], AGUA: [2,2,0,0,0,0,0,0,0,0], ENERGIA: [2,0,0,0,0,0,0,0,0,0], VERDE: [2,0,0,0,0,0,0,0,0,0] } }
+        ];
+
+        base.forEach(b => {
+            const clave = `cod_${b.dni}`;
+            if (!this.perfiles[clave]) {
+                this.perfiles[clave] = {
+                    dni: b.dni,
+                    codigo: b.dni,
+                    nombre: b.nombre,
+                    grado: b.grado,
+                    seccion: b.seccion,
+                    monedas: b.monedas,
+                    accesorio: b.accesorio,
+                    polo: b.polo,
+                    polosComprados: [0, b.polo],
+                    comprados: ['NINGUNO', b.accesorio],
+                    estrellas: b.estrellas,
+                    medallas: ['PRIMERA_ESTRELLA'],
+                    partidas: [
+                        { fecha: '2026-11-14 09:30:15', juegoId: 'LIMPIEZA', minijuego: 'Limpieza Monstruosa', puntaje: 420, nivel: 1, superado: true, aciertos: 14, errores: 1, precisionPct: 93, duracionSeg: 48, impacto: 7.0, unidadImpacto: 'kg residuos', preguntaCorrecta: true, estrellas: 3 },
+                        { fecha: '2026-11-14 09:42:10', juegoId: 'AGUA', minijuego: 'Guardián del Agua', puntaje: 380, nivel: 1, superado: true, aciertos: 12, errores: 0, precisionPct: 100, duracionSeg: 52, impacto: 45.0, unidadImpacto: 'litros agua', preguntaCorrecta: true, estrellas: 3 }
+                    ]
+                };
+            }
+        });
+        this.guardarPerfiles();
+    }
+
     cargarEstudianteActivo() {
         try {
             const raw = localStorage.getItem(this.CLAVE_ACTIVO);
@@ -45,36 +88,151 @@ class GestorAlmacenamiento {
         this.obtenerPerfil(estudiante); // asegura que exista
     }
 
+    cerrarSesionEstudiante() {
+        this.estudianteActivo = null;
+        try {
+            localStorage.removeItem(this.CLAVE_ACTIVO);
+        } catch (e) {}
+    }
+
+    // Sesión de docente
+    cargarSesionDocente() {
+        try {
+            const raw = localStorage.getItem(this.CLAVE_DOCENTE);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return null;
+    }
+
+    iniciarSesionDocente(usuario = 'Docente', clave = '') {
+        const pass = String(clave).trim().toLowerCase();
+        const clavesValidas = ['docente2026', 'profesor123', 'docente', 'admin', 'profesor', 'ica2026'];
+        if (!clavesValidas.includes(pass)) {
+            return false;
+        }
+        const sesion = {
+            usuario: usuario.trim() || 'Profesor de Primaria',
+            rol: 'DOCENTE',
+            fecha: new Date().toISOString()
+        };
+        this.sesionDocente = sesion;
+        try {
+            localStorage.setItem(this.CLAVE_DOCENTE, JSON.stringify(sesion));
+        } catch (e) {}
+        return true;
+    }
+
+    cerrarSesionDocente() {
+        this.sesionDocente = null;
+        try {
+            localStorage.removeItem(this.CLAVE_DOCENTE);
+        } catch (e) {}
+    }
+
+    esSesionDocente() {
+        return !!(this.sesionDocente && this.sesionDocente.rol === 'DOCENTE');
+    }
+
     crearClave(estudiante) {
         if (!estudiante) return 'anonimo';
+        if (estudiante.dni || estudiante.codigo) {
+            const cod = String(estudiante.dni || estudiante.codigo).trim().replace(/[^a-z0-9]/gi, '').toLowerCase();
+            if (cod) return `cod_${cod}`;
+        }
         const norm = (str) => (str || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
         return `${norm(estudiante.nombre)}_${estudiante.grado}_${norm(estudiante.seccion)}`;
+    }
+
+    buscarEstudiante(termino) {
+        if (!termino) return null;
+        const clean = String(termino).trim().toLowerCase();
+        const codClean = clean.replace(/[^a-z0-9]/g, '');
+
+        // 1. Por DNI o código exacto
+        for (const k in this.perfiles) {
+            const p = this.perfiles[k];
+            const pDni = String(p.dni || p.codigo || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (pDni && (pDni === codClean || pDni === clean)) {
+                return { clave: k, perfil: p };
+            }
+            if (k === `cod_${codClean}`) {
+                return { clave: k, perfil: p };
+            }
+        }
+
+        // 2. Por nombre exacto
+        for (const k in this.perfiles) {
+            const p = this.perfiles[k];
+            if ((p.nombre || '').toLowerCase().trim() === clean) {
+                return { clave: k, perfil: p };
+            }
+        }
+        return null;
+    }
+
+    listarAlumnosRecientes() {
+        const lista = [];
+        for (const k in this.perfiles) {
+            const p = this.perfiles[k];
+            lista.push({
+                clave: k,
+                dni: p.dni || p.codigo || '',
+                codigo: p.codigo || p.dni || '',
+                nombre: p.nombre,
+                grado: p.grado,
+                seccion: p.seccion,
+                estrellas: this.totalEstrellasGeneral(p),
+                monedas: p.monedas || 0,
+                polo: p.polo || 0,
+                accesorio: p.accesorio || 'NINGUNO'
+            });
+        }
+        lista.sort((a, b) => b.estrellas - a.estrellas);
+        return lista.slice(0, 10);
     }
 
     obtenerPerfil(estudiante = this.estudianteActivo) {
         if (!estudiante) return null;
         const clave = this.crearClave(estudiante);
         if (!this.perfiles[clave]) {
-            this.perfiles[clave] = {
-                nombre: estudiante.nombre.trim(),
-                grado: parseInt(estudiante.grado, 10) || 1,
-                seccion: (estudiante.seccion || 'A').toUpperCase().trim(),
-                monedas: 0,
-                accesorio: 'NINGUNO',
-                polo: 0,
-                polosComprados: [0],
-                comprados: ['NINGUNO'],
-                estrellas: {
-                    LIMPIEZA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    AGUA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    ENERGIA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    VERDE: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                },
-                medallas: [],
-                partidas: []
-            };
+            // Revisar si ya existía bajo la clave antigua por nombre
+            const norm = (str) => (str || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+            const claveNombre = `${norm(estudiante.nombre)}_${estudiante.grado}_${norm(estudiante.seccion)}`;
+            if (this.perfiles[claveNombre]) {
+                this.perfiles[clave] = this.perfiles[claveNombre];
+                delete this.perfiles[claveNombre];
+            } else {
+                this.perfiles[clave] = {
+                    dni: estudiante.dni || estudiante.codigo || '',
+                    codigo: estudiante.codigo || estudiante.dni || '',
+                    nombre: estudiante.nombre.trim(),
+                    grado: parseInt(estudiante.grado, 10) || 1,
+                    seccion: (estudiante.seccion || 'A').toUpperCase().trim(),
+                    monedas: 0,
+                    accesorio: 'NINGUNO',
+                    polo: 0,
+                    polosComprados: [0],
+                    comprados: ['NINGUNO'],
+                    estrellas: {
+                        LIMPIEZA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        AGUA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        ENERGIA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        VERDE: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    },
+                    medallas: [],
+                    partidas: []
+                };
+            }
             this.guardarPerfiles();
         }
+
+        // Si el estudiante tiene DNI y el perfil no lo tenía registrado, actualizarlo
+        if (estudiante.dni && !this.perfiles[clave].dni) {
+            this.perfiles[clave].dni = estudiante.dni;
+            this.perfiles[clave].codigo = estudiante.dni;
+            this.guardarPerfiles();
+        }
+
         if (!this.perfiles[clave].polosComprados) {
             this.perfiles[clave].polosComprados = [0];
         }
@@ -348,19 +506,119 @@ class GestorAlmacenamiento {
         return lista;
     }
 
-    // Exportar todas las partidas a CSV separado por ';' con BOM UTF-8
+    // Métricas y reporte pedagógico para el portal docente
+    obtenerReporteDocente(gradoFiltro = null, seccionFiltro = null, busqueda = '') {
+        const alumnos = [];
+        let totalLitrosAgua = 0;
+        let totalResiduos = 0;
+        let totalKwhEnergia = 0;
+        let totalAreaVerde = 0;
+        let totalEstrellasColegio = 0;
+        let totalNivelesCompletados = 0;
+
+        const term = (busqueda || '').toLowerCase().trim();
+
+        for (const k in this.perfiles) {
+            const p = this.perfiles[k];
+            const dni = p.dni || p.codigo || 'S/DNI';
+            const nombre = p.nombre || 'Alumno';
+            const grado = p.grado || 1;
+            const seccion = p.seccion || 'A';
+
+            if (gradoFiltro && grado !== parseInt(gradoFiltro, 10)) continue;
+            if (seccionFiltro && seccion !== seccionFiltro.toUpperCase()) continue;
+            if (term) {
+                const coincideDni = dni.toLowerCase().includes(term);
+                const coincideNombre = nombre.toLowerCase().includes(term);
+                if (!coincideDni && !coincideNombre) continue;
+            }
+
+            const estrellasLimpieza = (p.estrellas.LIMPIEZA || []).reduce((a, b) => a + b, 0);
+            const estrellasAgua = (p.estrellas.AGUA || []).reduce((a, b) => a + b, 0);
+            const estrellasEnergia = (p.estrellas.ENERGIA || []).reduce((a, b) => a + b, 0);
+            const estrellasVerde = (p.estrellas.VERDE || []).reduce((a, b) => a + b, 0);
+
+            const nivelesLimpieza = (p.estrellas.LIMPIEZA || []).filter(s => s > 0).length;
+            const nivelesAgua = (p.estrellas.AGUA || []).filter(s => s > 0).length;
+            const nivelesEnergia = (p.estrellas.ENERGIA || []).filter(s => s > 0).length;
+            const nivelesVerde = (p.estrellas.VERDE || []).filter(s => s > 0).length;
+
+            const totalEstrellas = estrellasLimpieza + estrellasAgua + estrellasEnergia + estrellasVerde;
+            const totalNiveles = nivelesLimpieza + nivelesAgua + nivelesEnergia + nivelesVerde;
+            const avancePct = Math.min(100, Math.round((totalNiveles / 40) * 100));
+
+            const impacto = this.obtenerImpacto(p);
+            totalLitrosAgua += impacto.AGUA;
+            totalResiduos += impacto.LIMPIEZA;
+            totalKwhEnergia += impacto.ENERGIA;
+            totalAreaVerde += impacto.VERDE;
+            totalEstrellasColegio += totalEstrellas;
+            totalNivelesCompletados += totalNiveles;
+
+            const preguntasAcertadas = (p.partidas || []).filter(s => s.preguntaCorrecta === true).length;
+
+            alumnos.push({
+                clave: k,
+                dni,
+                codigo: dni,
+                nombre,
+                grado,
+                seccion,
+                polo: p.polo || 0,
+                accesorio: p.accesorio || 'NINGUNO',
+                totalEstrellas,
+                totalNiveles,
+                avancePct,
+                estrellasLimpieza,
+                nivelesLimpieza,
+                estrellasAgua,
+                nivelesAgua,
+                estrellasEnergia,
+                nivelesEnergia,
+                estrellasVerde,
+                nivelesVerde,
+                medallas: (p.medallas || []).length,
+                impacto,
+                preguntasAcertadas,
+                totalPartidas: (p.partidas || []).length,
+                ultimaPartida: (p.partidas && p.partidas.length > 0) ? p.partidas[p.partidas.length - 1].fecha : 'Sin partidas'
+            });
+        }
+
+        // Ordenar por total de estrellas descendente
+        alumnos.sort((a, b) => {
+            if (b.totalEstrellas !== a.totalEstrellas) return b.totalEstrellas - a.totalEstrellas;
+            return b.avancePct - a.avancePct;
+        });
+
+        return {
+            alumnos,
+            metricas: {
+                totalAlumnos: alumnos.length,
+                totalEstrellas: totalEstrellasColegio,
+                totalLitrosAgua: Number(totalLitrosAgua.toFixed(1)),
+                totalResiduos: Number(totalResiduos.toFixed(1)),
+                totalKwhEnergia: Number(totalKwhEnergia.toFixed(2)),
+                totalAreaVerde: Number(totalAreaVerde.toFixed(1)),
+                promedioAvance: alumnos.length > 0 ? Math.round(alumnos.reduce((acc, a) => acc + a.avancePct, 0) / alumnos.length) : 0
+            }
+        };
+    }
+
+    // Exportar informe docente de todas las partidas a CSV separado por ';' con BOM UTF-8
     exportarCSV() {
-        const CABECERA = 'fecha;alumno;grado;seccion;codigo_juego;minijuego;puntaje;nivel;completado;aciertos;errores;precision_pct;duracion_seg;impacto;unidad_impacto;pregunta_correcta;estrellas';
+        const CABECERA = 'dni_codigo;alumno;grado;seccion;fecha;codigo_juego;minijuego;puntaje;nivel;completado;aciertos;errores;precision_pct;duracion_seg;impacto;unidad_impacto;pregunta_correcta;estrellas';
         const filas = [CABECERA];
 
         for (const k in this.perfiles) {
             const p = this.perfiles[k];
             for (const s of (p.partidas || [])) {
                 const campos = [
-                    s.fecha,
+                    p.dni || p.codigo || 'S/DNI',
                     p.nombre,
                     p.grado,
                     p.seccion,
+                    s.fecha,
                     s.juegoId,
                     s.minijuego,
                     s.puntaje,
@@ -384,7 +642,7 @@ class GestorAlmacenamiento {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ecorescate_partidas_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `ecorescate_informe_docente_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
