@@ -153,9 +153,11 @@ class AppEcoRescate {
             });
         }
 
-        // Reconocimiento inteligente al ingresar DNI o Código de Estudiante
+        // Reconocimiento inteligente al ingresar DNI o Código de Estudiante (máx. 8 cifras)
         if (this.inputCodigoEstudiante) {
             const manejarReconocimiento = () => {
+                // Forzar solo dígitos numéricos y máximo 8 cifras
+                this.inputCodigoEstudiante.value = this.inputCodigoEstudiante.value.replace(/\D/g, '').slice(0, 8);
                 const codigo = this.inputCodigoEstudiante.value.trim();
                 if (!codigo) {
                     if (this.alertaAlumnoReconocido) this.alertaAlumnoReconocido.style.display = 'none';
@@ -178,6 +180,24 @@ class AppEcoRescate {
             };
             this.inputCodigoEstudiante.addEventListener('input', manejarReconocimiento);
             this.inputCodigoEstudiante.addEventListener('change', manejarReconocimiento);
+        }
+
+        // Restringir usuario/DNI de docente a máx. 8 cifras o letras
+        if (this.inputUsuarioDocente) {
+            this.inputUsuarioDocente.addEventListener('input', (e) => {
+                if (e.target.value.length > 8) {
+                    e.target.value = e.target.value.slice(0, 8);
+                }
+            });
+        }
+
+        // Restringir contraseña de docente a máx. 12 dígitos o letras
+        if (this.inputClaveDocente) {
+            this.inputClaveDocente.addEventListener('input', (e) => {
+                if (e.target.value.length > 12) {
+                    e.target.value = e.target.value.slice(0, 12);
+                }
+            });
         }
 
         // Formulario de registro/login de estudiante
@@ -415,7 +435,18 @@ class AppEcoRescate {
         const grado = parseInt(this.selectGrado.value, 10);
         const seccion = this.selectSeccion.value;
 
-        if (!nombre) return;
+        if (!nombre) {
+            alert('Por favor ingresa el nombre del alumno.');
+            if (this.inputNombre) this.inputNombre.focus();
+            return;
+        }
+
+        // Validar DNI de 8 cifras
+        if (codigo.length !== 8 || !/^\d{8}$/.test(codigo)) {
+            alert('El DNI debe tener exactamente 8 cifras numéricas.');
+            if (this.inputCodigoEstudiante) this.inputCodigoEstudiante.focus();
+            return;
+        }
 
         const estudiante = {
             dni: codigo,
