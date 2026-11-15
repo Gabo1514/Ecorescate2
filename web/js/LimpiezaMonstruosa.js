@@ -633,117 +633,229 @@ class LimpiezaMonstruosa extends MinijuegoBase {
     }
 
     dibujarCielo(ctx, fase) {
+        ctx.save();
         const cielos = [
-            ['#38BDF8', '#BAE6FD', '#E0F2FE'], // Mañana
-            ['#F59E0B', '#FDE68A', '#FFFBEB'], // Tarde
-            ['#4338CA', '#C026D3', '#F97316'], // Atardecer en el desierto de Ica
-            ['#0F172A', '#1E1B4B', '#312E81']  // Noche estrellada
+            ['#0284C7', '#38BDF8', '#BAE6FD', '#E0F2FE'], // Mañana brillante
+            ['#D97706', '#F59E0B', '#FDE68A', '#FFFBEB'], // Tarde dorada
+            ['#312E81', '#7C3AED', '#C026D3', '#F97316'], // Atardecer en el desierto de Ica
+            ['#0B0F19', '#0F172A', '#1E1B4B', '#312E81']  // Noche estrellada
         ];
         const colores = cielos[fase] || cielos[0];
-        const grad = ctx.createLinearGradient(0, this.ESC_Y, 0, 220);
+        const grad = ctx.createLinearGradient(0, this.ESC_Y, 0, 222);
         grad.addColorStop(0, colores[0]);
-        grad.addColorStop(0.55, colores[1]);
-        grad.addColorStop(1, colores[2]);
+        grad.addColorStop(0.35, colores[1]);
+        grad.addColorStop(0.75, colores[2]);
+        grad.addColorStop(1, colores[3]);
         ctx.fillStyle = grad;
-        ctx.fillRect(this.ESC_X, this.ESC_Y, this.ESC_W, 115);
+        ctx.fillRect(this.ESC_X, this.ESC_Y, this.ESC_W, 116);
 
-        // Dunas doradas lejanas de Huacachina en el horizonte
-        const colorDuna1 = fase === 3 ? '#1E1B4B' : (fase === 2 ? '#C2410C' : '#D97706');
-        const colorDuna2 = fase === 3 ? '#0F172A' : (fase === 2 ? '#9A3412' : '#B45309');
+        // Estrellas titilantes si es de noche
+        if (fase === 3) {
+            ctx.fillStyle = '#FFFFFF';
+            for (let i = 0; i < 24; i++) {
+                const ex = this.ESC_X + 20 + ((i * 47) % (this.ESC_W - 40));
+                const ey = this.ESC_Y + 8 + ((i * 29) % 85);
+                const brillo = 0.4 + Math.sin(this.relojTotal * 4 + i) * 0.4;
+                ctx.globalAlpha = brillo;
+                ctx.beginPath();
+                ctx.arc(ex, ey, i % 3 === 0 ? 1.8 : 1.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        // Dunas doradas lejanas de Huacachina en el horizonte de Ica
+        // Capa lejana de dunas
+        const colorDuna1 = fase === 3 ? '#1E1B4B' : (fase === 2 ? '#9A3412' : '#D97706');
+        const colorDuna2 = fase === 3 ? '#0F172A' : (fase === 2 ? '#7C2D12' : '#B45309');
 
         ctx.fillStyle = colorDuna1;
+        ctx.globalAlpha = 0.65;
         ctx.beginPath();
-        ctx.moveTo(this.ESC_X, 214);
-        ctx.quadraticCurveTo(240, 155, 480, 185);
-        ctx.quadraticCurveTo(720, 215, this.ESC_DER, 170);
-        ctx.lineTo(this.ESC_DER, 214);
+        ctx.moveTo(this.ESC_X, 216);
+        ctx.bezierCurveTo(160, 162, 320, 190, 480, 172);
+        ctx.bezierCurveTo(620, 158, 760, 192, this.ESC_DER, 168);
+        ctx.lineTo(this.ESC_DER, 216);
+        ctx.lineTo(this.ESC_X, 216);
         ctx.closePath();
         ctx.fill();
 
+        // Capa intermedia con aristas de viento
         ctx.fillStyle = colorDuna2;
+        ctx.globalAlpha = 0.85;
         ctx.beginPath();
-        ctx.moveTo(this.ESC_X, 214);
-        ctx.quadraticCurveTo(320, 180, 640, 165);
-        ctx.quadraticCurveTo(840, 155, this.ESC_DER, 195);
-        ctx.lineTo(this.ESC_DER, 214);
+        ctx.moveTo(this.ESC_X, 216);
+        ctx.bezierCurveTo(220, 185, 380, 168, 540, 194);
+        ctx.bezierCurveTo(690, 210, 810, 174, this.ESC_DER, 192);
+        ctx.lineTo(this.ESC_DER, 216);
+        ctx.lineTo(this.ESC_X, 216);
         ctx.closePath();
         ctx.fill();
+        ctx.globalAlpha = 1.0;
 
-        // Sol o Luna con resplandor
+        // Sol o Luna con resplandor atmosférico
         if (fase === 3) {
-            // Luna creciente brillante
+            // Luna creciente con halo nocturno
+            const lx = 880, ly = 146;
+            const gradLuna = ctx.createRadialGradient(lx, ly, 4, lx, ly, 36);
+            gradLuna.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
+            gradLuna.addColorStop(1, 'rgba(254, 240, 138, 0)');
+            ctx.fillStyle = gradLuna;
+            ctx.beginPath();
+            ctx.arc(lx, ly, 36, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cuerpo de la luna
             ctx.fillStyle = '#FEF08A';
             ctx.beginPath();
-            ctx.arc(880, 148, 22, 0, Math.PI * 2);
+            ctx.arc(lx, ly, 20, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = colores[1];
             ctx.beginPath();
-            ctx.arc(888, 144, 20, 0, Math.PI * 2);
+            ctx.arc(lx + 8, ly - 4, 18, 0, Math.PI * 2);
             ctx.fill();
         } else {
-            // Sol radiante con corona
-            const solColor = fase === 2 ? '#EA580C' : '#FBBF24';
-            const gradSol = ctx.createRadialGradient(880, 148, 10, 880, 148, 38);
-            gradSol.addColorStop(0, '#FFFFFF');
-            gradSol.addColorStop(0.4, solColor);
-            gradSol.addColorStop(1, 'rgba(251, 191, 36, 0)');
+            // Sol radiante con corona y rayos
+            const sx = 880, sy = 146;
+            const solColor = fase === 2 ? '#EA580C' : '#F59E0B';
+
+            // Resplandor exterior
+            const gradSol = ctx.createRadialGradient(sx, sy, 8, sx, sy, 46);
+            gradSol.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            gradSol.addColorStop(0.35, solColor);
+            gradSol.addColorStop(1, 'rgba(245, 158, 11, 0)');
             ctx.fillStyle = gradSol;
             ctx.beginPath();
-            ctx.arc(880, 148, 38, 0, Math.PI * 2);
+            ctx.arc(sx, sy, 46, 0, Math.PI * 2);
             ctx.fill();
 
+            // Rayos del sol girando suavemente
+            const numRayos = 10;
+            const rot = this.relojTotal * 0.22;
+            ctx.strokeStyle = solColor;
+            ctx.lineWidth = 2.5;
+            for (let i = 0; i < numRayos; i++) {
+                const ang = rot + (i * Math.PI * 2) / numRayos;
+                ctx.beginPath();
+                ctx.moveTo(sx + Math.cos(ang) * 24, sy + Math.sin(ang) * 24);
+                ctx.lineTo(sx + Math.cos(ang) * 34, sy + Math.sin(ang) * 34);
+                ctx.stroke();
+            }
+
+            // Disco solar puro
             ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
-            ctx.arc(880, 148, 16, 0, Math.PI * 2);
+            ctx.arc(sx, sy, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#FEF08A';
+            ctx.beginPath();
+            ctx.arc(sx, sy, 14, 0, Math.PI * 2);
             ctx.fill();
         }
+
+        ctx.restore();
     }
 
     dibujarCasa(ctx, cx, color) {
-        // Fachada colonial iqueña con textura y profundidad
+        // Fachada colonial iqueña con arquerías, molduras y campanario
         ctx.save();
-        ctx.fillStyle = color;
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2;
+
+        // 1. Sombra suave bajo el edificio
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
         ctx.beginPath();
-        ctx.roundRect(cx - 52, 160, 104, 54, 4);
+        ctx.roundRect(cx - 56, 162, 112, 54, 4);
+        ctx.fill();
+
+        // 2. Muro colonial principal de adobe/ladrillo
+        const gradMuro = ctx.createLinearGradient(cx, 156, cx, 214);
+        gradMuro.addColorStop(0, color);
+        gradMuro.addColorStop(1, this.oscurecerHex(color, 0.22));
+
+        ctx.fillStyle = gradMuro;
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.roundRect(cx - 52, 156, 104, 58, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Tejado colonial de tejas curvas de arcilla
-        ctx.fillStyle = '#B91C1C';
+        // Cornisa superior de piedra labrada
+        ctx.fillStyle = '#FEF3C7';
+        ctx.strokeStyle = '#78350F';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(cx - 60, 162);
-        ctx.lineTo(cx, 132);
-        ctx.lineTo(cx + 60, 162);
+        ctx.roundRect(cx - 56, 153, 112, 6, 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 3. Tejado colonial de tejas curvas de arcilla de Ica
+        const gradTecho = ctx.createLinearGradient(cx, 126, cx, 154);
+        gradTecho.addColorStop(0, '#DC2626');
+        gradTecho.addColorStop(0.5, '#B91C1C');
+        gradTecho.addColorStop(1, '#7F1D1D');
+
+        ctx.fillStyle = gradTecho;
+        ctx.beginPath();
+        ctx.moveTo(cx - 62, 154);
+        ctx.lineTo(cx, 124);
+        ctx.lineTo(cx + 62, 154);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Detalle de tejas
-        ctx.strokeStyle = '#991B1B';
-        ctx.lineWidth = 1.5;
-        for (let i = -40; i <= 40; i += 16) {
+        // Acanaladuras de las tejas coloniales
+        ctx.strokeStyle = '#7F1D1D';
+        ctx.lineWidth = 1.8;
+        for (let i = -44; i <= 44; i += 14) {
             ctx.beginPath();
-            ctx.moveTo(cx + i * 0.8, 146);
-            ctx.lineTo(cx + i, 162);
+            ctx.moveTo(cx + i * 0.72, 138);
+            ctx.lineTo(cx + i, 154);
             ctx.stroke();
         }
 
-        // Balcón colonial de madera
+        // 4. Balcón colonial de madera de cedro torneada
         ctx.fillStyle = '#78350F';
-        ctx.strokeStyle = '#1E293B';
+        ctx.strokeStyle = '#451A03';
         ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.roundRect(cx - 24, 172, 48, 14, 2);
+        ctx.roundRect(cx - 26, 168, 52, 16, 2);
         ctx.fill();
         ctx.stroke();
 
-        // Ventanal con luz cálida
-        ctx.fillStyle = '#FEF08A';
+        // Barandilla del balcón
+        ctx.strokeStyle = '#B45309';
+        ctx.lineWidth = 1.4;
+        for (let bx = cx - 20; bx <= cx + 20; bx += 8) {
+            ctx.beginPath();
+            ctx.moveTo(bx, 172);
+            ctx.lineTo(bx, 183);
+            ctx.stroke();
+        }
+
+        // Ventanal de arco de medio punto con luz interior cálida
+        const gradLuzVentana = ctx.createRadialGradient(cx, 166, 1, cx, 166, 12);
+        gradLuzVentana.addColorStop(0, '#FEF08A');
+        gradLuzVentana.addColorStop(0.8, '#F59E0B');
+        gradLuzVentana.addColorStop(1, '#B45309');
+
+        ctx.fillStyle = gradLuzVentana;
         ctx.beginPath();
-        ctx.arc(cx, 170, 10, Math.PI, 0);
+        ctx.arc(cx, 166, 10, Math.PI, 0);
         ctx.fill();
+        ctx.strokeStyle = '#451A03';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Portal de arquería en planta baja
+        ctx.fillStyle = '#1E1B4B';
+        ctx.beginPath();
+        ctx.arc(cx, 202, 12, Math.PI, 0);
+        ctx.lineTo(cx + 12, 214);
+        ctx.lineTo(cx - 12, 214);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#451A03';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.restore();
@@ -751,101 +863,167 @@ class LimpiezaMonstruosa extends MinijuegoBase {
 
     dibujarNube(ctx, x, y, s) {
         ctx.save();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+        // Sombra inferior de la nube volumétrica
+        ctx.fillStyle = '#CBD5E1';
         ctx.beginPath();
-        ctx.arc(x, y + 10 * s, 16 * s, 0, Math.PI * 2);
-        ctx.arc(x + 22 * s, y, 22 * s, 0, Math.PI * 2);
-        ctx.arc(x + 48 * s, y + 8 * s, 18 * s, 0, Math.PI * 2);
+        ctx.arc(x, y + 12 * s, 16 * s, 0, Math.PI * 2);
+        ctx.arc(x + 22 * s, y + 3 * s, 22 * s, 0, Math.PI * 2);
+        ctx.arc(x + 48 * s, y + 10 * s, 18 * s, 0, Math.PI * 2);
         ctx.fill();
-        // Sombra suave en la base de la nube
-        ctx.fillStyle = 'rgba(226, 232, 240, 0.6)';
+
+        // Cuerpo blanco brillante de la nube
+        ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.ellipse(x + 24 * s, y + 14 * s, 32 * s, 6 * s, 0, 0, Math.PI * 2);
+        ctx.arc(x, y + 8 * s, 16 * s, 0, Math.PI * 2);
+        ctx.arc(x + 22 * s, y - 2 * s, 22 * s, 0, Math.PI * 2);
+        ctx.arc(x + 48 * s, y + 6 * s, 18 * s, 0, Math.PI * 2);
         ctx.fill();
+
+        // Brillo superior dorado suave
+        ctx.fillStyle = 'rgba(254, 243, 199, 0.45)';
+        ctx.beginPath();
+        ctx.arc(x + 24 * s, y - 4 * s, 14 * s, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     }
 
     dibujarArbol(ctx, x, y) {
-        // Palmera datilera de Ica elegante y con movimiento orgánico
+        // Palmera datilera de Ica elegante con tronco escamado y frondas en movimiento
         ctx.save();
-        const viento = Math.sin(this.relojTotal * 2.2 + x) * 4;
+        const viento = Math.sin(this.relojTotal * 2.4 + x * 0.05) * 5;
 
-        // Tronco curvado con anillos de corteza
-        ctx.strokeStyle = '#78350F';
-        ctx.lineWidth = 11;
+        // Sombra de la palmera en el suelo
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(x + 12, y + 2, 20, 6, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tronco curvado con gradiente leñoso
+        const copX = x + viento * 0.55;
+        const copY = y - 92;
+
+        ctx.strokeStyle = '#451A03';
+        ctx.lineWidth = 12;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(x + 4, y - 45, x + viento * 0.5, y - 88);
+        ctx.quadraticCurveTo(x + 6, y - 48, copX, copY);
         ctx.stroke();
 
         ctx.strokeStyle = '#92400E';
-        ctx.lineWidth = 8;
+        ctx.lineWidth = 9;
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(x + 4, y - 45, x + viento * 0.5, y - 88);
+        ctx.quadraticCurveTo(x + 6, y - 48, copX, copY);
         ctx.stroke();
 
-        // Anillos del tronco
-        ctx.strokeStyle = '#451A03';
-        ctx.lineWidth = 1.6;
-        for (let i = 1; i <= 6; i++) {
-            const ty = y - i * 13;
+        // Anillos escamados de la corteza
+        ctx.strokeStyle = '#78350F';
+        ctx.lineWidth = 1.8;
+        for (let i = 1; i <= 7; i++) {
+            const ty = y - i * 12;
+            const ox = (i / 7) * (copX - x);
             ctx.beginPath();
-            ctx.moveTo(x - 5, ty);
-            ctx.lineTo(x + 5, ty);
+            ctx.moveTo(x + ox - 6, ty);
+            ctx.lineTo(x + ox + 6, ty);
             ctx.stroke();
         }
 
-        // Racimo de dátiles/cocos
-        const copX = x + viento * 0.5;
-        const copY = y - 88;
-        ctx.fillStyle = '#78350F';
+        // Racimo de dátiles maduros de color ámbar
+        ctx.fillStyle = '#D97706';
         ctx.beginPath();
-        ctx.arc(copX - 4, copY + 3, 5, 0, Math.PI * 2);
-        ctx.arc(copX + 4, copY + 3, 5, 0, Math.PI * 2);
-        ctx.arc(copX, copY + 6, 5, 0, Math.PI * 2);
+        ctx.arc(copX - 5, copY + 4, 4.5, 0, Math.PI * 2);
+        ctx.arc(copX + 5, copY + 4, 4.5, 0, Math.PI * 2);
+        ctx.arc(copX, copY + 8, 4.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Frondas de palmera en abanico que se mecen con el viento
-        const coloresFronda = ['#15803D', '#16A34A', '#22C55E', '#4ADE80'];
+        // Frondas botánicas de palmera en abanico
+        const coloresFronda = ['#14532D', '#15803D', '#16A34A', '#22C55E', '#4ADE80'];
         const angulos = [-2.4, -1.8, -1.2, -0.6, 0.0, 0.6, 1.2, 1.8, 2.4];
 
         angulos.forEach((ang, idx) => {
-            const rad = ang + viento * 0.04;
-            const len = 42 + (idx % 2) * 8;
+            const rad = ang + viento * 0.035;
+            const len = 44 + (idx % 2) * 9;
             const destX = copX + Math.sin(rad) * len;
-            const destY = copY - Math.cos(rad) * len * 0.55 + 6;
+            const destY = copY - Math.cos(rad) * len * 0.52 + 6;
 
+            // Nervadura de la fronda
             ctx.strokeStyle = coloresFronda[idx % coloresFronda.length];
-            ctx.lineWidth = 3.5;
+            ctx.lineWidth = 3.6;
             ctx.beginPath();
             ctx.moveTo(copX, copY);
-            ctx.quadraticCurveTo(copX + Math.sin(rad) * len * 0.5, copY - 14, destX, destY);
+            ctx.quadraticCurveTo(copX + Math.sin(rad) * len * 0.5, copY - 16, destX, destY);
             ctx.stroke();
+
+            // Foliolos laterales de la hoja de palmera
+            ctx.strokeStyle = coloresFronda[(idx + 1) % coloresFronda.length];
+            ctx.lineWidth = 1.5;
+            for (let f = 0.3; f <= 0.9; f += 0.2) {
+                const fx = copX + (destX - copX) * f;
+                const fy = copY + (destY - copY) * f - 6 * (1 - f);
+                ctx.beginPath();
+                ctx.moveTo(fx, fy);
+                ctx.lineTo(fx + 6 * Math.cos(rad), fy + 7);
+                ctx.stroke();
+            }
         });
 
         ctx.restore();
     }
 
     dibujarPlaza(ctx) {
-        // Pavimento colonial con degradado y calidez
+        ctx.save();
+
+        // 1. Explanada de la Plaza de Armas de Ica con pavimento colonial de terracota
         const gradPlaza = ctx.createLinearGradient(0, 214, 0, 564);
-        gradPlaza.addColorStop(0, '#E2D4BC');
-        gradPlaza.addColorStop(1, '#D4BFA0');
+        gradPlaza.addColorStop(0, '#E8DCB8');
+        gradPlaza.addColorStop(0.35, '#DEC8A0');
+        gradPlaza.addColorStop(0.85, '#CFB284');
+        gradPlaza.addColorStop(1, '#BFA070');
+
         ctx.fillStyle = gradPlaza;
         ctx.beginPath();
         ctx.roundRect(64, 214, 872, 350, 28);
         ctx.fill();
 
-        // Borde de piedra labrada
+        // Borde exterior de piedra tallada con relieve 3D
         ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Patrón ornamental de adoquines
-        ctx.strokeStyle = 'rgba(168, 142, 108, 0.35)';
-        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(66, 216, 868, 346, 26);
+        ctx.stroke();
+
+        // 2. Rosetón / medallón geométrico central de adoquines coloniales
+        const medX = 500, medY = 410;
+        ctx.strokeStyle = 'rgba(168, 142, 108, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(medX, medY, 120, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(medX, medY, 80, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(medX, medY, 40, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Rayos de la estrella de la plaza
+        for (let r = 0; r < 8; r++) {
+            const ang = (r * Math.PI) / 4;
+            ctx.beginPath();
+            ctx.moveTo(medX + Math.cos(ang) * 40, medY + Math.sin(ang) * 40);
+            ctx.lineTo(medX + Math.cos(ang) * 120, medY + Math.sin(ang) * 120);
+            ctx.stroke();
+        }
+
+        // Líneas horizontales de juntas de cantería
+        ctx.strokeStyle = 'rgba(168, 142, 108, 0.28)';
+        ctx.lineWidth = 1.5;
         for (let y = 260; y <= 530; y += 46) {
             ctx.beginPath();
             ctx.moveTo(80, y);
@@ -853,25 +1031,89 @@ class LimpiezaMonstruosa extends MinijuegoBase {
             ctx.stroke();
         }
 
-        // Plataforma central de los tachos con moldura
-        const gradPlat = ctx.createLinearGradient(0, 216, 0, 320);
-        gradPlat.addColorStop(0, '#CBD5E1');
-        gradPlat.addColorStop(1, '#94A3B8');
+        // 3. Faroles coloniales clásicos de hierro forjado en las esquinas de la plaza
+        const dibujarFarolColonial = (fx, fy) => {
+            // Sombra en el suelo
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+            ctx.beginPath();
+            ctx.ellipse(fx, fy + 4, 12, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Poste de hierro negro
+            ctx.fillStyle = '#0F172A';
+            ctx.fillRect(fx - 2.5, fy - 58, 5, 58);
+
+            // Base moldurada
+            ctx.beginPath();
+            ctx.roundRect(fx - 7, fy - 6, 14, 8, 2);
+            ctx.fill();
+
+            // Farol de 4 caras con vidrio cálido
+            ctx.fillStyle = '#0F172A';
+            ctx.beginPath();
+            ctx.roundRect(fx - 9, fy - 76, 18, 6, 2); // Sombrerete
+            ctx.fill();
+
+            // Luz interior brillante
+            const gradFarol = ctx.createRadialGradient(fx, fy - 66, 1, fx, fy - 66, 26);
+            gradFarol.addColorStop(0, '#FFFBEB');
+            gradFarol.addColorStop(0.35, '#FDE047');
+            gradFarol.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = gradFarol;
+            ctx.beginPath();
+            ctx.arc(fx, fy - 66, 26, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Vidrio del farol
+            ctx.fillStyle = '#FEF08A';
+            ctx.fillRect(fx - 6, fy - 70, 12, 12);
+            ctx.strokeStyle = '#0F172A';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(fx - 6, fy - 70, 12, 12);
+        };
+        dibujarFarolColonial(110, 290);
+        dibujarFarolColonial(890, 290);
+
+        // 4. Plataforma central elevada de granito pulido para la estación de reciclaje
+        const platX = 286, platY = 214, platW = 428, platH = 110;
+
+        // Sombra de la plataforma
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
+        ctx.beginPath();
+        ctx.roundRect(platX - 2, platY + 4, platW + 4, platH + 8, 20);
+        ctx.fill();
+
+        // Zócalo de granito
+        const gradPlat = ctx.createLinearGradient(0, platY, 0, platY + platH);
+        gradPlat.addColorStop(0, '#E2E8F0');
+        gradPlat.addColorStop(0.3, '#CBD5E1');
+        gradPlat.addColorStop(0.85, '#94A3B8');
+        gradPlat.addColorStop(1, '#64748B');
+
         ctx.fillStyle = gradPlat;
         ctx.beginPath();
-        ctx.roundRect(288, 216, 424, 108, 18);
+        ctx.roundRect(platX, platY, platW, platH, 18);
         ctx.fill();
 
         ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.6;
         ctx.stroke();
 
-        // Línea reflectiva superior
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        // Moldura dorada de demarcación "ZONA DE RECICLAJE ESCOLAR"
+        ctx.strokeStyle = '#F59E0B';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(292, 218, 416, 10, 5);
+        ctx.roundRect(platX + 4, platY + 4, platW - 8, platH - 8, 14);
         ctx.stroke();
+
+        // Brillo superior biselado de mármol
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.roundRect(platX + 6, platY + 6, platW - 12, 8, 4);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarTacho(ctx, t) {
@@ -880,18 +1122,28 @@ class LimpiezaMonstruosa extends MinijuegoBase {
             ctx.translate(Math.sin(t.temblor * 60) * 5, 0);
         }
 
-        // Brillo aureolar al depositar residuos correctamente
+        // 1. Brillo aureolar y partículas estelares al depositar residuos correctamente
         if (t.brillo > 0) {
-            const resplandor = ctx.createRadialGradient(t.x + t.w / 2, t.y + t.h / 2, 10, t.x + t.w / 2, t.y + t.h / 2, 80);
-            resplandor.addColorStop(0, 'rgba(255, 215, 0, 0.7)');
-            resplandor.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            const resplandor = ctx.createRadialGradient(t.x + t.w / 2, t.y + t.h / 2, 8, t.x + t.w / 2, t.y + t.h / 2, 85);
+            resplandor.addColorStop(0, 'rgba(251, 191, 36, 0.75)');
+            resplandor.addColorStop(0.5, 'rgba(245, 158, 11, 0.35)');
+            resplandor.addColorStop(1, 'rgba(245, 158, 11, 0)');
             ctx.fillStyle = resplandor;
             ctx.beginPath();
-            ctx.arc(t.x + t.w / 2, t.y + t.h / 2, 80, 0, Math.PI * 2);
+            ctx.arc(t.x + t.w / 2, t.y + t.h / 2, 85, 0, Math.PI * 2);
             ctx.fill();
+
+            // Destellos de estrellas celebratorias
+            ctx.fillStyle = '#FFFFFF';
+            for (let e = 0; e < 6; e++) {
+                const ang = (e * Math.PI) / 3 + this.relojTotal * 3;
+                const ex = t.x + t.w / 2 + Math.cos(ang) * 55;
+                const ey = t.y + t.h / 2 + Math.sin(ang) * 45;
+                this.dibujarEstrellaForma(ctx, ex, ey, 4.5, '#FDE047');
+            }
         }
 
-        // Anillo de progreso cuando el alumno espera frente al tacho
+        // 2. Anillo de progreso cuando el alumno espera frente al tacho
         if (t === this.tachoFrente && this.mochila.length > 0 && !this.entregaHecha) {
             ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 5;
@@ -901,65 +1153,89 @@ class LimpiezaMonstruosa extends MinijuegoBase {
             ctx.stroke();
         }
 
-        // Sombra suave en la base del tacho
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+        // 3. Sombra de contacto en la base del tacho
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.38)';
         ctx.beginPath();
-        ctx.ellipse(t.x + t.w / 2, t.y + t.h + 2, t.w / 2 + 4, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(t.x + t.w / 2, t.y + t.h + 3, t.w / 2 + 5, 9, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cuerpo cilíndrico del tacho con gradiente volumétrico
+        // 4. Cuerpo cilíndrico del tacho con acabado metálico/plástico premium
         const gradCuerpo = ctx.createLinearGradient(t.x, 0, t.x + t.w, 0);
-        gradCuerpo.addColorStop(0, this.aclararHex(t.material.color, 0.25));
-        gradCuerpo.addColorStop(0.35, t.material.color);
-        gradCuerpo.addColorStop(1, this.oscurecerHex(t.material.color, 0.3));
+        gradCuerpo.addColorStop(0, this.aclararHex(t.material.color, 0.35));
+        gradCuerpo.addColorStop(0.25, this.aclararHex(t.material.color, 0.15));
+        gradCuerpo.addColorStop(0.6, t.material.color);
+        gradCuerpo.addColorStop(1, this.oscurecerHex(t.material.color, 0.38));
 
         ctx.fillStyle = gradCuerpo;
         ctx.beginPath();
         ctx.roundRect(t.x, t.y + 12, t.w, t.h - 12, 14);
         ctx.fill();
 
+        // Contorno nítido del cuerpo
         ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 2.8;
         ctx.stroke();
 
-        // Tapa abovedada moderna con ranura de entrada
+        // Franja vertical de brillo especular
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+        ctx.beginPath();
+        ctx.roundRect(t.x + 8, t.y + 14, 7, t.h - 18, 3);
+        ctx.fill();
+
+        // 5. Tapa abovedada moderna con ranura aerodinámica
         const gradTapa = ctx.createLinearGradient(t.x, 0, t.x + t.w, 0);
-        gradTapa.addColorStop(0, '#475569');
-        gradTapa.addColorStop(0.5, '#1E293B');
+        gradTapa.addColorStop(0, '#64748B');
+        gradTapa.addColorStop(0.35, '#334155');
+        gradTapa.addColorStop(0.7, '#1E293B');
         gradTapa.addColorStop(1, '#0F172A');
 
         ctx.fillStyle = gradTapa;
         ctx.beginPath();
-        ctx.roundRect(t.x - 4, t.y, t.w + 8, 16, 8);
+        ctx.roundRect(t.x - 4, t.y, t.w + 8, 17, 8);
         ctx.fill();
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.4;
         ctx.stroke();
 
-        // Ranura oscura para tirar basura
-        ctx.fillStyle = '#0F172A';
+        // Ranura oscura para depositar residuos
+        ctx.fillStyle = '#020617';
         ctx.beginPath();
-        ctx.roundRect(t.x + 14, t.y + 5, t.w - 28, 6, 3);
+        ctx.roundRect(t.x + 14, t.y + 5, t.w - 28, 7, 3.5);
         ctx.fill();
 
-        // Placa blanca con logotipo de reciclaje y nombre
+        // 6. Placa frontal blanca esmaltada con logotipo de reciclaje
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.roundRect(t.x + 8, t.y + 24, t.w - 16, 34, 8);
+        ctx.roundRect(t.x + 8, t.y + 25, t.w - 16, 36, 8);
         ctx.fill();
         ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Título del material
-        ctx.fillStyle = '#0F172A';
-        ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(t.material.titulo, t.x + t.w / 2, t.y + 41);
+        // Símbolo oficial de reciclaje (3 flechas en bucle Möbius)
+        const icX = t.x + 22, icY = t.y + 43;
+        ctx.strokeStyle = t.material.color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(icX, icY, 7, 0, Math.PI * 1.6);
+        ctx.stroke();
+        ctx.fillStyle = t.material.color;
+        ctx.beginPath();
+        ctx.arc(icX, icY - 7, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
-        // Subtítulo con ejemplos
-        ctx.fillStyle = '#64748B';
-        ctx.font = '800 10px "Segoe UI", system-ui, sans-serif';
-        ctx.fillText(t.material.ejemplos.toUpperCase(), t.x + t.w / 2, t.y + 70);
+        // Nombre del tacho con tipografía nítida
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '900 14px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(t.material.titulo, t.x + 35, t.y + 43);
+
+        // Subtítulo con ejemplos curriculares
+        ctx.fillStyle = '#475569';
+        ctx.font = '800 9.5px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(t.material.ejemplos.toUpperCase(), t.x + t.w / 2, t.y + 72);
 
         ctx.restore();
     }
@@ -1556,52 +1832,96 @@ class LimpiezaMonstruosa extends MinijuegoBase {
         ctx.save();
         ctx.translate(l.x, l.y);
 
-        // Sombra
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        // Sombra suave en el pavimento
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
         ctx.beginPath();
-        ctx.ellipse(0, 0, 42, 10, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 2, 46, 12, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        const pulso = Math.sin(l.anim) * 0.06;
+        const pulso = Math.sin(l.anim) * 0.08;
         ctx.scale(1 + pulso, 1 - pulso);
 
-        // Masa viscosa morada
-        ctx.fillStyle = '#8E6BB5';
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 3;
+        // Masa viscosa morada y tóxica con degradado de volumen
+        const gradLodo = ctx.createRadialGradient(0, -22, 4, 0, -18, 48);
+        gradLodo.addColorStop(0, '#A855F7');
+        gradLodo.addColorStop(0.45, '#7C3AED');
+        gradLodo.addColorStop(0.85, '#581C87');
+        gradLodo.addColorStop(1, '#3B0764');
+
+        ctx.fillStyle = gradLodo;
+        ctx.strokeStyle = '#1E1B4B';
+        ctx.lineWidth = 2.8;
         ctx.beginPath();
-        ctx.moveTo(-40, 0);
-        ctx.quadraticCurveTo(-48, -18, -32, -26);
-        ctx.lineTo(-24, -42);
-        ctx.lineTo(-14, -28);
-        ctx.lineTo(0, -52);
-        ctx.lineTo(12, -30);
-        ctx.lineTo(24, -44);
-        ctx.quadraticCurveTo(44, -26, 42, 0);
+        ctx.moveTo(-42, 0);
+        ctx.quadraticCurveTo(-50, -18, -34, -28);
+        ctx.lineTo(-26, -44);
+        ctx.lineTo(-16, -30);
+        ctx.lineTo(0, -54);
+        ctx.lineTo(14, -32);
+        ctx.lineTo(26, -46);
+        ctx.quadraticCurveTo(46, -28, 44, 0);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // 3 ojos malévolos
-        const ojos = [[-14, -18], [2, -22], [18, -16]];
-        ojos.forEach(([ox, oy]) => {
-            ctx.fillStyle = '#1B1530';
+        // Reflejos brillantes de viscosidad gelatinosa
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(-14, -36, 6, 2.5, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(8, -42, 4, 2, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Burbujas tóxicas emergiendo del lodo
+        for (let b = 0; b < 3; b++) {
+            const bx = -20 + b * 18 + Math.sin(this.relojTotal * 4 + b) * 3;
+            const by = -8 + Math.cos(this.relojTotal * 5 + b) * 4;
+            ctx.fillStyle = '#C084FC';
             ctx.beginPath();
-            ctx.arc(ox, oy, 4.5, 0, Math.PI * 2);
+            ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#7CFF8A';
+            ctx.strokeStyle = '#581C87';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            // Reflejo
+            ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
-            ctx.arc(ox + 1, oy, 2, 0, Math.PI * 2);
+            ctx.arc(bx - 1, by - 1, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 3 ojos malévolos con pupila radiactiva brillante
+        const ojos = [[-14, -20], [2, -24], [18, -18]];
+        ojos.forEach(([ox, oy]) => {
+            // Fondo oscuro del ojo
+            ctx.fillStyle = '#0F172A';
+            ctx.beginPath();
+            ctx.arc(ox, oy, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Pupila verde ácido radiactivo
+            ctx.fillStyle = '#4ADE80';
+            ctx.beginPath();
+            ctx.arc(ox + 0.8, oy, 2.4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Punto negro interior
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(ox + 1.2, oy, 1.2, 0, Math.PI * 2);
             ctx.fill();
         });
 
-        // Boca en zigzag
-        ctx.strokeStyle = '#1B1530';
-        ctx.lineWidth = 2.5;
+        // Boca amenazante en zigzag
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
-        ctx.moveTo(-14, -8);
+        ctx.moveTo(-16, -10);
         for (let i = 1; i <= 6; i++) {
-            ctx.lineTo(-14 + i * 4.5, i % 2 === 0 ? -8 : -3);
+            ctx.lineTo(-16 + i * 5, i % 2 === 0 ? -10 : -4);
         }
         ctx.stroke();
 

@@ -339,131 +339,184 @@ class GuardianAgua extends MinijuegoBase {
 
     // Dibujar escena completa de los Lavaderos
     dibujarEscena(ctx) {
-        // Pared de mayólicas de baño escolar con gradiente e iluminación
+        ctx.save();
+
+        // 1. Pared de mayólicas de baño escolar con iluminación ambiental
         const gradPared = ctx.createLinearGradient(0, this.ESC_Y, 0, 500);
         gradPared.addColorStop(0, '#E0F2FE');
-        gradPared.addColorStop(0.5, '#BAE6FD');
-        gradPared.addColorStop(1, '#7DD3FC');
+        gradPared.addColorStop(0.4, '#BAE6FD');
+        gradPared.addColorStop(0.85, '#7DD3FC');
+        gradPared.addColorStop(1, '#38BDF8');
         ctx.fillStyle = gradPared;
         ctx.fillRect(this.ESC_X, this.ESC_Y, this.ESC_W, this.ESC_H);
 
-        // Cuadrícula de azulejos cerámicos con reflejo especular
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        // Cuadrícula de azulejos cerámicos con relieve y brillo especular
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
         ctx.lineWidth = 1.6;
-        for (let x = this.ESC_X; x < 812; x += 40) {
+        for (let x = this.ESC_X; x < 815; x += 38) {
             ctx.beginPath();
             ctx.moveTo(x, this.ESC_Y);
             ctx.lineTo(x, 500);
             ctx.stroke();
         }
-        for (let y = this.ESC_Y + 10; y < 500; y += 40) {
+        for (let y = this.ESC_Y + 8; y < 500; y += 38) {
             ctx.beginPath();
             ctx.moveTo(this.ESC_X, y);
-            ctx.lineTo(812, y);
+            ctx.lineTo(815, y);
             ctx.stroke();
         }
 
-        // Franja de azulejos de acento azul marino
+        // Cenefa decorativa de mosaico azul marino con patrón geométrico
+        ctx.fillStyle = '#0369A1';
+        ctx.fillRect(this.ESC_X, 156, 794, 12);
         ctx.fillStyle = '#0284C7';
-        ctx.fillRect(this.ESC_X, 160, 790, 8);
+        ctx.fillRect(this.ESC_X, 158, 794, 8);
+        ctx.fillStyle = '#38BDF8';
+        for (let mx = this.ESC_X + 6; mx < 810; mx += 16) {
+            ctx.fillRect(mx, 160, 8, 4);
+        }
 
-        // Suelo de baldosas con perspectiva
+        // 2. Suelo de baldosas de granito con perspectiva y brillo
         const gradPiso = ctx.createLinearGradient(0, 500, 0, this.ESC_ABA);
         gradPiso.addColorStop(0, '#94A3B8');
-        gradPiso.addColorStop(1, '#64748B');
+        gradPiso.addColorStop(0.35, '#64748B');
+        gradPiso.addColorStop(0.85, '#475569');
+        gradPiso.addColorStop(1, '#334155');
         ctx.fillStyle = gradPiso;
         ctx.fillRect(this.ESC_X, 500, this.ESC_W, this.ESC_ABA - 500);
 
-        ctx.strokeStyle = '#475569';
+        // Juntas diagonales del suelo con perspectiva
+        ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 1.8;
-        for (let x = this.ESC_X; x < this.ESC_DER; x += 70) {
+        for (let x = this.ESC_X - 60; x < this.ESC_DER + 40; x += 64) {
             ctx.beginPath();
             ctx.moveTo(x, 500);
-            ctx.lineTo(x - 30, this.ESC_ABA);
+            ctx.lineTo(x - 38, this.ESC_ABA);
             ctx.stroke();
         }
 
-        // Espejos sobre los lavaderos con destellos
+        // Línea horizontal divisoria zócalo/suelo con sombra
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+        ctx.fillRect(this.ESC_X, 498, this.ESC_W, 4);
+
+        // 3. Espejos sobre los lavaderos con marcos biselados y destellos
         for (let i = 0; i < 4; i++) {
             const cx = 150 + i * 186;
             this.dibujarEspejo(ctx, cx, 192);
 
             // Dispensadores de jabón líquido entre lavaderos
             if (cx < 700) {
-                this.dibujarDispensador(ctx, cx + 93, 300);
+                this.dibujarDispensador(ctx, cx + 93, 298);
             }
         }
 
-        // Letrero educativo en la pared
-        this.dibujarLetrero(ctx, 300, 136, 236, 34);
+        // 4. Cartel educativo institucional sobre la pared
+        this.dibujarLetrero(ctx, 290, 134, 256, 36);
 
-        // Mueble inferior de mayólica y mesada
+        // 5. Mueble de mesada continua con lavamanos
         this.dibujarMesada(ctx);
 
-        // Maceta con planta verde que se mece
+        // 6. Maceta con planta verde oxigenadora en la esquina
         this.dibujarPlantita(ctx, 792, this.MESA_Y);
 
-        // Tanque de agua a la derecha
+        // 7. Tanque de reserva de agua a la derecha con animación de nivel
         this.dibujarTanque(ctx);
 
-        // Lavaderos, caños, chorro de agua y gotas
+        // 8. Lavaderos, caños cromados, chorro de agua y gotas
         this.lavaderos.forEach(l => this.dibujarLavadero(ctx, l));
 
-        // Gotas en el aire
-        ctx.fillStyle = '#3BA3D9';
+        // 9. Gotas de agua en el aire con destello
         for (const g of this.gotas) {
-            this.dibujarFormaGota(ctx, g.x, g.y, 6);
+            ctx.fillStyle = '#38BDF8';
+            this.dibujarFormaGota(ctx, g.x, g.y, 6.5);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(g.x - 1.5, g.y - 1.5, 1.6, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        // Niños en los lavaderos
+        // 10. Niños lavándose las manos en los lavaderos
         this.lavaderos.forEach(l => this.dibujarNino(ctx, l));
+
+        ctx.restore();
     }
 
     dibujarEspejo(ctx, cx, cy) {
         ctx.save();
-        // Marco de madera/cromo elegante con bisel
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.5;
+        const ew = 94, eh = 114;
+
+        // Sombra de contacto del marco del espejo
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
         ctx.beginPath();
-        ctx.roundRect(cx - 46, cy - 2, 92, 112, 14);
+        ctx.roundRect(cx - ew / 2 + 3, cy + 3, ew, eh, 14);
+        ctx.fill();
+
+        // Marco exterior de aluminio pulido con bisel
+        const gradMarco = ctx.createLinearGradient(cx - ew / 2, cy, cx + ew / 2, cy + eh);
+        gradMarco.addColorStop(0, '#F8FAFC');
+        gradMarco.addColorStop(0.3, '#E2E8F0');
+        gradMarco.addColorStop(0.7, '#CBD5E1');
+        gradMarco.addColorStop(1, '#94A3B8');
+
+        ctx.fillStyle = gradMarco;
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.roundRect(cx - ew / 2, cy, ew, eh, 14);
         ctx.fill();
         ctx.stroke();
 
-        // Vidrio con reflejo cielo
-        const gradEspejo = ctx.createLinearGradient(cx - 42, cy, cx + 42, cy + 108);
-        gradEspejo.addColorStop(0, '#F0F9FF');
-        gradEspejo.addColorStop(0.5, '#E0F2FE');
-        gradEspejo.addColorStop(1, '#BAE6FD');
-        ctx.fillStyle = gradEspejo;
+        // Vidrio del espejo con reflejo degradado
+        const gradVidrio = ctx.createLinearGradient(cx - ew / 2, cy, cx + ew / 2, cy + eh);
+        gradVidrio.addColorStop(0, '#FFFFFF');
+        gradVidrio.addColorStop(0.3, '#E0F2FE');
+        gradVidrio.addColorStop(0.7, '#BAE6FD');
+        gradVidrio.addColorStop(1, '#7DD3FC');
+
+        ctx.fillStyle = gradVidrio;
         ctx.beginPath();
-        ctx.roundRect(cx - 42, cy + 2, 84, 104, 10);
+        ctx.roundRect(cx - ew / 2 + 5, cy + 5, ew - 10, eh - 10, 10);
         ctx.fill();
 
-        // Reflejos blancos diagonales
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        // Reflejos diagonales de luz en el cristal
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(cx - 26, cy + 34);
+        ctx.moveTo(cx - 28, cy + 36);
         ctx.lineTo(cx - 8, cy + 16);
-        ctx.moveTo(cx - 26, cy + 56);
-        ctx.lineTo(cx + 8, cy + 22);
+        ctx.moveTo(cx - 28, cy + 62);
+        ctx.lineTo(cx + 12, cy + 22);
         ctx.stroke();
 
-        // Destello brillante móvil en el espejo
+        // Destello de brillo móvil en la esquina
         const brillo = (this.relojTotal * 0.45 + cx * 0.01) % 3;
         if (brillo < 1) {
-            const bx = cx - 30 + brillo * 60;
-            const by = cy + 18 + brillo * 70;
+            const bx = cx - 32 + brillo * 64;
+            const by = cy + 18 + brillo * 72;
             ctx.fillStyle = `rgba(255, 255, 255, ${Math.sin(brillo * Math.PI) * 0.9})`;
-            this.dibujarEstrellaForma(ctx, bx, by, 7, '#FFFFFF');
+            this.dibujarEstrellaForma(ctx, bx, by, 7.5, '#FFFFFF');
         }
+
         ctx.restore();
     }
 
     dibujarDispensador(ctx, x, y) {
-        ctx.fillStyle = '#F472B6';
+        ctx.save();
+
+        // Sombra suave en la pared
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+        ctx.beginPath();
+        ctx.roundRect(x - 11, y + 2, 24, 38, 8);
+        ctx.fill();
+
+        // Depósito translúcido de jabón líquido rosado
+        const gradJabon = ctx.createLinearGradient(x - 12, y, x + 12, y);
+        gradJabon.addColorStop(0, '#F472B6');
+        gradJabon.addColorStop(0.4, '#FBCFE8');
+        gradJabon.addColorStop(1, '#DB2777');
+
+        ctx.fillStyle = gradJabon;
         ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -471,38 +524,78 @@ class GuardianAgua extends MinijuegoBase {
         ctx.fill();
         ctx.stroke();
 
-        // Cabezal dosificador cromado
-        ctx.fillStyle = '#E2E8F0';
+        // Líquido y burbuja interior
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.beginPath();
-        ctx.roundRect(x - 4, y - 10, 8, 12, 3);
+        ctx.arc(x - 4, y + 14, 2.5, 0, Math.PI * 2);
         ctx.fill();
+
+        // Cabezal dosificador cromado
+        const gradCromo = ctx.createLinearGradient(x - 5, y - 10, x + 5, y);
+        gradCromo.addColorStop(0, '#F1F5F9');
+        gradCromo.addColorStop(0.5, '#CBD5E1');
+        gradCromo.addColorStop(1, '#64748B');
+        ctx.fillStyle = gradCromo;
+        ctx.beginPath();
+        ctx.roundRect(x - 5, y - 10, 10, 12, 3);
+        ctx.fill();
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 1.8;
         ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarLetrero(ctx, x, y, w, h) {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.5;
+        ctx.save();
+
+        // Sombra de cartel
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
         ctx.beginPath();
-        ctx.roundRect(x, y, w, h, 17);
+        ctx.roundRect(x + 2, y + 3, w, h, 18);
+        ctx.fill();
+
+        // Placa acrílica blanca esmaltada con bisel
+        const gradCartel = ctx.createLinearGradient(x, y, x, y + h);
+        gradCartel.addColorStop(0, '#FFFFFF');
+        gradCartel.addColorStop(0.7, '#F8FAFC');
+        gradCartel.addColorStop(1, '#E2E8F0');
+
+        ctx.fillStyle = gradCartel;
+        ctx.strokeStyle = '#0284C7';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 18);
         ctx.fill();
         ctx.stroke();
 
+        // Icono de gota de agua pura
         ctx.fillStyle = '#0284C7';
-        this.dibujarFormaGota(ctx, x + 26, y + 17, 8);
+        this.dibujarFormaGota(ctx, x + 24, y + 18, 9);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(x + 22, y + 16, 2, 0, Math.PI * 2);
+        ctx.fill();
 
+        // Texto educativo institucional
         ctx.fillStyle = '#0F172A';
-        ctx.font = '900 14px "Segoe UI", system-ui, sans-serif';
+        ctx.font = '900 13.5px "Segoe UI", system-ui, sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText('¡CADA GOTA CUENTA!', x + 44, y + 17);
+        ctx.fillText('¡CADA GOTA CUENTA EN ICA!', x + 42, y + 18);
+
+        ctx.restore();
     }
 
     dibujarMesada(ctx) {
-        // Mueble bajo de lavabos con relieve
+        ctx.save();
+
+        // 1. Mueble bajo de melamina/azulejo con zócalo
         const gradMueble = ctx.createLinearGradient(0, 436, 0, 502);
         gradMueble.addColorStop(0, '#94A3B8');
-        gradMueble.addColorStop(1, '#64748B');
+        gradMueble.addColorStop(0.4, '#64748B');
+        gradMueble.addColorStop(1, '#475569');
+
         ctx.fillStyle = gradMueble;
         ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 2.5;
@@ -511,208 +604,283 @@ class GuardianAgua extends MinijuegoBase {
         ctx.fill();
         ctx.stroke();
 
-        // Puertas del mueble con relieves
+        // Puertas del mueble con tiradores cromados
         for (let i = 0; i < 4; i++) {
             const cx = 150 + i * 186;
-            ctx.fillStyle = '#CBD5E1';
+            ctx.fillStyle = '#E2E8F0';
             ctx.beginPath();
-            ctx.roundRect(cx - 40, 446, 80, 48, 6);
+            ctx.roundRect(cx - 42, 444, 84, 50, 6);
             ctx.fill();
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.8;
             ctx.stroke();
 
-            // Tirador cromado
+            // Tirador horizontal de acero cepillado
             ctx.fillStyle = '#0284C7';
             ctx.beginPath();
-            ctx.arc(cx - 4, 470, 4, 0, Math.PI * 2);
+            ctx.roundRect(cx - 14, 466, 28, 5, 2.5);
             ctx.fill();
+            ctx.fillStyle = '#BAE6FD';
+            ctx.fillRect(cx - 12, 467, 24, 1.5);
         }
 
-        // Tablero blanco superior de la mesada con brillo
-        const gradTablero = ctx.createLinearGradient(0, this.MESA_Y, 0, this.MESA_Y + 20);
+        // 2. Tablero de mármol/granito blanco superior de la mesada
+        const gradTablero = ctx.createLinearGradient(0, this.MESA_Y, 0, this.MESA_Y + 22);
         gradTablero.addColorStop(0, '#FFFFFF');
-        gradTablero.addColorStop(1, '#E2E8F0');
+        gradTablero.addColorStop(0.35, '#F1F5F9');
+        gradTablero.addColorStop(0.8, '#CBD5E1');
+        gradTablero.addColorStop(1, '#94A3B8');
+
         ctx.fillStyle = gradTablero;
         ctx.beginPath();
-        ctx.roundRect(28, this.MESA_Y, 788, 20, 8);
+        ctx.roundRect(28, this.MESA_Y, 788, 22, 9);
         ctx.fill();
+
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.4;
         ctx.stroke();
+
+        // Bisel superior iluminado
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(30, this.MESA_Y + 1, 784, 8, 4);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarPlantita(ctx, x, y) {
-        const viento = Math.sin(this.relojTotal * 2) * 2;
-        // Maceta terracota
-        ctx.fillStyle = '#EA580C';
-        ctx.strokeStyle = '#1E293B';
+        ctx.save();
+        const oscilacion = Math.sin(this.relojTotal * 2.4) * 3;
+
+        // Maceta de terracota vidriada
+        ctx.fillStyle = '#D97706';
+        ctx.strokeStyle = '#78350F';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(x - 14, y - 24);
-        ctx.lineTo(x + 14, y - 24);
-        ctx.lineTo(x + 10, y);
-        ctx.lineTo(x - 10, y);
+        ctx.moveTo(x - 12, y);
+        ctx.lineTo(x - 9, y + 20);
+        ctx.lineTo(x + 9, y + 20);
+        ctx.lineTo(x + 12, y);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Hojas verdes
-        ctx.fillStyle = '#16A34A';
+        // Borde superior de la maceta
+        ctx.fillStyle = '#B45309';
         ctx.beginPath();
-        ctx.ellipse(x - 8 + viento, y - 32, 10, 6, -0.4, 0, Math.PI * 2);
-        ctx.ellipse(x + 8 + viento, y - 32, 10, 6, 0.4, 0, Math.PI * 2);
-        ctx.ellipse(x + viento, y - 40, 6, 12, 0, 0, Math.PI * 2);
+        ctx.roundRect(x - 14, y - 4, 28, 6, 2);
         ctx.fill();
         ctx.stroke();
+
+        // Hojas verdes oxigenadoras
+        const hojas = [-18, -8, 0, 8, 18];
+        hojas.forEach((ang, idx) => {
+            const hx = x + ang * 0.8 + oscilacion * 0.3;
+            const hy = y - 12 - Math.abs(ang) * 0.4;
+            ctx.fillStyle = idx % 2 === 0 ? '#22C55E' : '#15803D';
+            ctx.beginPath();
+            ctx.ellipse(hx, hy, 7, 14, (ang * Math.PI) / 90, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#14532D';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+        });
+
+        ctx.restore();
     }
 
     dibujarLavadero(ctx, l) {
+        ctx.save();
         const cx = l.cx;
 
-        // Cuenco / poza del lavadero de porcelana
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.5;
+        // 1. Sombra bajo la poza de porcelana
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
         ctx.beginPath();
-        ctx.ellipse(cx, this.MESA_Y + 3, 50, 12, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, this.MESA_Y + 5, 52, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Poza ovalada de porcelana blanca vitrificada
+        const gradPozaExt = ctx.createLinearGradient(cx - 52, 0, cx + 52, 0);
+        gradPozaExt.addColorStop(0, '#E2E8F0');
+        gradPozaExt.addColorStop(0.3, '#FFFFFF');
+        gradPozaExt.addColorStop(1, '#CBD5E1');
+
+        ctx.fillStyle = gradPozaExt;
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.ellipse(cx, this.MESA_Y + 3, 50, 13, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Interior con profundidad radial
-        const gradPoza = ctx.createRadialGradient(cx, this.MESA_Y + 3, 5, cx, this.MESA_Y + 3, 44);
-        gradPoza.addColorStop(0, '#CBD5E1');
-        gradPoza.addColorStop(0.7, '#E2E8F0');
+        // Interior cóncavo de la poza con gradiente de profundidad
+        const gradPoza = ctx.createRadialGradient(cx, this.MESA_Y + 4, 4, cx, this.MESA_Y + 3, 44);
+        gradPoza.addColorStop(0, '#94A3B8');
+        gradPoza.addColorStop(0.5, '#CBD5E1');
+        gradPoza.addColorStop(0.85, '#E2E8F0');
         gradPoza.addColorStop(1, '#FFFFFF');
+
         ctx.fillStyle = gradPoza;
         ctx.beginPath();
-        ctx.ellipse(cx, this.MESA_Y + 3, 42, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, this.MESA_Y + 3, 42, 9, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Desagüe cromado en el fondo
-        ctx.fillStyle = '#475569';
+        // Desagüe de latón cromado con rejilla
+        ctx.fillStyle = '#334155';
         ctx.beginPath();
-        ctx.ellipse(cx, this.MESA_Y + 4, 6, 2.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, this.MESA_Y + 4, 7, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0F172A';
+        ctx.beginPath();
+        ctx.ellipse(cx, this.MESA_Y + 4, 3.5, 1.5, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Agua acumulada en la poza
+        // Agua limpia acumulada en la poza con ondas translúcidas
         if (l.aguaNivel > 0.02) {
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.75)';
+            const gradAguaPoza = ctx.createRadialGradient(cx, this.MESA_Y + 3, 2, cx, this.MESA_Y + 3, 38 * l.aguaNivel);
+            gradAguaPoza.addColorStop(0, '#BAE6FD');
+            gradAguaPoza.addColorStop(0.6, '#38BDF8');
+            gradAguaPoza.addColorStop(1, '#0284C7');
+
+            ctx.fillStyle = gradAguaPoza;
             ctx.beginPath();
-            ctx.ellipse(cx, this.MESA_Y + 3, 38 * l.aguaNivel, 6 * l.aguaNivel, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx, this.MESA_Y + 3, 38 * l.aguaNivel, 7 * l.aguaNivel, 0, 0, Math.PI * 2);
             ctx.fill();
+
+            // Ondas de agua en la poza
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
         }
 
-        // Grifo de metal cromado con gradiente metálico
+        // 3. Grifo de metal cromado con gradiente volumétrico
         const gradCromo = ctx.createLinearGradient(cx + 18, 0, cx + 32, 0);
-        gradCromo.addColorStop(0, '#94A3B8');
-        gradCromo.addColorStop(0.35, '#FFFFFF');
+        gradCromo.addColorStop(0, '#64748B');
+        gradCromo.addColorStop(0.25, '#CBD5E1');
+        gradCromo.addColorStop(0.5, '#FFFFFF');
+        gradCromo.addColorStop(0.85, '#94A3B8');
         gradCromo.addColorStop(1, '#475569');
 
         ctx.fillStyle = gradCromo;
-        ctx.strokeStyle = '#1E293B';
+        ctx.strokeStyle = '#0F172A';
         ctx.lineWidth = 2.2;
         ctx.beginPath();
         ctx.roundRect(cx + 18, 358, 14, 64, 5);
         ctx.fill();
         ctx.stroke();
 
-        // Brazo curvado del caño
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 10;
+        // Brazo curvado de cuello de cisne del caño
+        ctx.strokeStyle = '#CBD5E1';
+        ctx.lineWidth = 11;
         ctx.lineCap = 'butt';
         ctx.lineJoin = 'round';
         ctx.beginPath();
         ctx.moveTo(cx + 25, 364);
-        ctx.quadraticCurveTo(cx + 25, 350, cx + 12, 350);
-        ctx.lineTo(cx + 6, 350);
-        ctx.quadraticCurveTo(cx, 350, cx, 362);
+        ctx.quadraticCurveTo(cx + 25, 348, cx + 12, 348);
+        ctx.lineTo(cx + 6, 348);
+        ctx.quadraticCurveTo(cx, 348, cx, 362);
         ctx.lineTo(cx, 374);
         ctx.stroke();
 
-        // Contorno oscuro del caño
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.2;
+        // Brillo superior del tubo cromado
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 4;
         ctx.stroke();
 
-        // Manija en cruz (roja si está abierta, azul si está cerrada)
+        // Contorno exterior nítido del caño
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(cx + 25, 364);
+        ctx.quadraticCurveTo(cx + 25, 348, cx + 12, 348);
+        ctx.lineTo(cx + 6, 348);
+        ctx.quadraticCurveTo(cx, 348, cx, 362);
+        ctx.lineTo(cx, 374);
+        ctx.stroke();
+
+        // Boquilla aireadora en el pico del grifo
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath();
+        ctx.roundRect(cx - 4, 372, 8, 4, 1.5);
+        ctx.fill();
+
+        // 4. Manija giratoria en cruz (roja de alerta si está abierta, azul de ahorro si está cerrada)
         const mx = cx + 25, my = 344;
         ctx.save();
         ctx.translate(mx, my);
         ctx.rotate(l.giroManija * Math.PI * 0.75 + (l.abierto ? 0.6 : 0));
 
-        const colorManija = l.abierto ? '#EF5A5A' : '#4C9BC9';
-        ctx.strokeStyle = '#2A2340';
+        const colorManija = l.abierto ? '#EF4444' : '#0284C7';
+        ctx.strokeStyle = '#0F172A';
         ctx.lineWidth = 10;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(-16, 0); ctx.lineTo(16, 0);
-        ctx.moveTo(0, -10); ctx.lineTo(0, 10);
+        ctx.moveTo(0, -16); ctx.lineTo(0, 16);
         ctx.stroke();
 
         ctx.strokeStyle = colorManija;
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 6.5;
+        ctx.beginPath();
+        ctx.moveTo(-15, 0); ctx.lineTo(15, 0);
+        ctx.moveTo(0, -15); ctx.lineTo(0, 15);
         ctx.stroke();
 
+        // Núcleo central de la manija
         ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
-        // Chorro de agua que cae si el caño está abierto y no goteando
-        if (l.abierto && !l.goteo) {
-            const fondoY = l.actividad === 'ENJUAGA' ? 404 : this.MESA_Y + 2;
-            ctx.fillStyle = 'rgba(59, 163, 217, 0.85)';
-            ctx.strokeStyle = 'rgba(154, 218, 246, 0.9)';
-            ctx.lineWidth = 2;
+        // 5. Chorro de agua cristalina y salpicaduras si está abierto
+        if (l.abierto) {
+            // Chorro principal
+            const gradChorro = ctx.createLinearGradient(cx - 4, 376, cx + 4, this.MESA_Y + 2);
+            gradChorro.addColorStop(0, '#BAE6FD');
+            gradChorro.addColorStop(0.5, '#38BDF8');
+            gradChorro.addColorStop(1, '#0284C7');
+
+            ctx.fillStyle = gradChorro;
             ctx.beginPath();
-            ctx.moveTo(cx - 5, 376);
-            for (let yy = 376; yy <= fondoY; yy += 6) {
-                ctx.lineTo(cx - 5 + Math.sin(this.relojTotal * 18 + yy * 0.25) * 1.5, yy);
-            }
-            for (let yy = fondoY; yy >= 376; yy -= 6) {
-                ctx.lineTo(cx + 5 + Math.sin(this.relojTotal * 18 + yy * 0.25 + 1) * 1.5, yy);
-            }
+            ctx.moveTo(cx - 3, 376);
+            ctx.lineTo(cx + 3, 376);
+            ctx.lineTo(cx + 5, this.MESA_Y + 2);
+            ctx.lineTo(cx - 5, this.MESA_Y + 2);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
 
-            // Salpicaduras de agua en la base del chorro
-            ctx.fillStyle = 'rgba(59, 163, 217, 0.9)';
-            for (let i = 0; i < 5; i++) {
-                const f = (this.relojTotal * 3 + i * 0.2) % 1;
-                const sx = cx + Math.cos(i * 1.7) * 20 * f;
-                const sy = fondoY - Math.sin(f * Math.PI) * 10;
+            // Salpicaduras en la poza
+            ctx.fillStyle = '#BAE6FD';
+            for (let s = 0; s < 4; s++) {
+                const sx = cx + Math.sin(this.relojTotal * 16 + s) * 14;
+                const sy = this.MESA_Y - 2 + Math.cos(this.relojTotal * 14 + s) * 5;
                 ctx.beginPath();
-                ctx.arc(sx, sy, 2.5, 0, Math.PI * 2);
+                ctx.arc(sx, sy, 2, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        // Aviso visual si el caño está abandonado o goteando
-        if (l.abierto && l.actividad === 'NADA' && l.salida <= 0) {
-            const pulso = 1 + Math.sin(this.relojTotal * 8) * 0.1;
-            const bx = cx - 36, by = 336;
-
-            ctx.fillStyle = l.tiempoAbierto > 4 ? '#FF6B6B' : '#FFD84D';
-            ctx.strokeStyle = '#2A2340';
+        // 6. Fuga de agua en tubería si tiene avería
+        if (l.fuga) {
+            // Chorro de fuga en el codo inferior
+            ctx.strokeStyle = '#38BDF8';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
-            ctx.arc(bx, by, 15 * pulso, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(cx + 25, 412);
+            ctx.quadraticCurveTo(cx + 36, 418, cx + 48, 432);
             ctx.stroke();
 
-            ctx.fillStyle = '#2A2340';
-            ctx.font = 'bold 18px "Segoe UI", system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('!', bx, by);
-
-            if (l.goteo) {
-                this.dibujarPildora(ctx, 'GOTEA', cx, 302, '#1E5874', '#FFFFFF');
-            }
+            // Alerta visual de fuga
+            ctx.fillStyle = '#EF4444';
+            ctx.beginPath();
+            ctx.arc(cx + 25, 412, 4, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        if (l.cerroSolo > 0) {
-            this.dibujarPildora(ctx, '✓ ¡Cerró el caño!', cx, 302, '#16A34A', '#FFFFFF');
-        }
+        ctx.restore();
     }
 
     dibujarNino(ctx, l) {

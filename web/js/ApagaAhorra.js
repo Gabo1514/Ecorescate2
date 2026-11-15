@@ -404,64 +404,83 @@ class ApagaAhorra extends MinijuegoBase {
     }
 
     dibujarCieloExterior(ctx, factorNoche) {
-        // Cielo con gradiente según la hora escolar
+        ctx.save();
+        // 1. Cielo atmosférico según la hora del día escolar
         const gradCielo = ctx.createLinearGradient(0, this.ESC_Y, 0, 480);
         if (factorNoche < 0.4) {
-            // Tarde luminosa (Ica soleada)
-            gradCielo.addColorStop(0, '#5B5EA6');
-            gradCielo.addColorStop(1, '#F6B27A');
+            // Tarde luminosa (Ica soleada con horizonte cálido)
+            gradCielo.addColorStop(0, '#0284C7');
+            gradCielo.addColorStop(0.35, '#38BDF8');
+            gradCielo.addColorStop(0.75, '#BAE6FD');
+            gradCielo.addColorStop(1, '#FFEDD5');
         } else if (factorNoche < 0.75) {
-            // Atardecer crepuscular
-            gradCielo.addColorStop(0, '#312E81');
-            gradCielo.addColorStop(0.6, '#7C3AED');
-            gradCielo.addColorStop(1, '#FB923C');
+            // Atardecer crepuscular en el desierto
+            gradCielo.addColorStop(0, '#1E1B4B');
+            gradCielo.addColorStop(0.35, '#4338CA');
+            gradCielo.addColorStop(0.7, '#C026D3');
+            gradCielo.addColorStop(1, '#F97316');
         } else {
-            // Noche profunda
-            gradCielo.addColorStop(0, '#0F172A');
-            gradCielo.addColorStop(0.7, '#1E1B4B');
-            gradCielo.addColorStop(1, '#3730A3');
+            // Noche profunda estrellada
+            gradCielo.addColorStop(0, '#020617');
+            gradCielo.addColorStop(0.4, '#0F172A');
+            gradCielo.addColorStop(0.8, '#1E1B4B');
+            gradCielo.addColorStop(1, '#312E81');
         }
 
         ctx.fillStyle = gradCielo;
         ctx.fillRect(this.ESC_X, this.ESC_Y, this.ESC_W, this.ESC_H);
 
-        // Sol o Luna en el cielo exterior derecho
+        // 2. Sol o Luna en el cielo exterior derecho
         if (factorNoche < 0.5) {
-            // Sol poniéndose sobre el desierto de Ica
+            // Sol radiante poniéndose sobre el desierto de Ica
             const solY = 140 + factorNoche * 60;
-            ctx.fillStyle = '#FFD27A';
-            ctx.strokeStyle = '#2A2340';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(890, solY, 36, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            const sx = 892;
 
-            // Rayos suaves
-            ctx.fillStyle = 'rgba(255, 236, 160, 0.25)';
+            // Halo envolvente
+            const gradSol = ctx.createRadialGradient(sx, solY, 8, sx, solY, 44);
+            gradSol.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+            gradSol.addColorStop(0.4, 'rgba(251, 191, 36, 0.35)');
+            gradSol.addColorStop(1, 'rgba(245, 158, 11, 0)');
+            ctx.fillStyle = gradSol;
             ctx.beginPath();
-            ctx.arc(890, solY, 52, 0, Math.PI * 2);
+            ctx.arc(sx, solY, 44, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Disco solar
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(sx, solY, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#FDE047';
+            ctx.beginPath();
+            ctx.arc(sx, solY, 14, 0, Math.PI * 2);
             ctx.fill();
         } else {
             // Luna creciente dorada
             const lunaX = 890, lunaY = 145;
+
+            // Resplandor lunar
+            const gradLuna = ctx.createRadialGradient(lunaX, lunaY, 4, lunaX, lunaY, 36);
+            gradLuna.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
+            gradLuna.addColorStop(1, 'rgba(254, 240, 138, 0)');
+            ctx.fillStyle = gradLuna;
+            ctx.beginPath();
+            ctx.arc(lunaX, lunaY, 36, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.fillStyle = '#FEF08A';
-            ctx.strokeStyle = '#2A2340';
-            ctx.lineWidth = 2.5;
             ctx.beginPath();
-            ctx.arc(lunaX, lunaY, 26, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Muesca que forma la luna menguante/creciente
-            ctx.fillStyle = factorNoche < 0.75 ? '#312E81' : '#0F172A';
-            ctx.beginPath();
-            ctx.arc(lunaX + 11, lunaY - 3, 24, 0, Math.PI * 2);
+            ctx.arc(lunaX, lunaY, 20, 0, Math.PI * 2);
             ctx.fill();
 
-            // Estrellas titilantes en el cielo despejado
+            // Muesca lunar
+            ctx.fillStyle = factorNoche < 0.75 ? '#4338CA' : '#0F172A';
+            ctx.beginPath();
+            ctx.arc(lunaX + 9, lunaY - 4, 18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Estrellas titilantes
             this.estrellasCielo.forEach(e => {
-                // Solo dibujar en las zonas de cielo visibles (fuera de la masa del colegio)
                 if (e.y < 165 || e.x < 44 || e.x > 956) {
                     const brillo = 0.35 + 0.65 * (Math.sin(this.relojTotal * e.vel + e.fase) * 0.5 + 0.5);
                     ctx.fillStyle = `rgba(255, 255, 255, ${brillo})`;
@@ -472,46 +491,72 @@ class ApagaAhorra extends MinijuegoBase {
             });
         }
 
-        // Césped escolar en la base del edificio
-        ctx.fillStyle = '#6DB35A';
+        // 3. Césped escolar en la base del edificio
+        const gradCesped = ctx.createLinearGradient(0, 544, 0, this.ESC_ABA);
+        gradCesped.addColorStop(0, '#4ADE80');
+        gradCesped.addColorStop(0.5, '#22C55E');
+        gradCesped.addColorStop(1, '#15803D');
+        ctx.fillStyle = gradCesped;
         ctx.fillRect(this.ESC_X, 544, this.ESC_W, this.ESC_ABA - 544);
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.5;
+
+        ctx.strokeStyle = '#14532D';
+        ctx.lineWidth = 2.2;
         ctx.beginPath();
         ctx.moveTo(this.ESC_X, 544);
         ctx.lineTo(this.ESC_DER, 544);
         ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarEstructuraColegio(ctx) {
-        // Techo de tejas rojas a dos aguas
-        ctx.fillStyle = '#B5513F';
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 3.5;
+        ctx.save();
+        // Fachada moderna de pabellón escolar bicentenario
+        ctx.fillStyle = '#CBD5E1';
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.4;
+
+        // Cornisa superior del pabellón
+        const gradCornisa = ctx.createLinearGradient(0, 168, 0, 182);
+        gradCornisa.addColorStop(0, '#FFFFFF');
+        gradCornisa.addColorStop(1, '#94A3B8');
+        ctx.fillStyle = gradCornisa;
         ctx.beginPath();
-        ctx.moveTo(32, 174);
-        ctx.lineTo(82, 136);
-        ctx.lineTo(918, 136);
-        ctx.lineTo(968, 174);
-        ctx.closePath();
+        ctx.roundRect(40, 168, 920, 14, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Letrero del colegio en el frontón del techo
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '900 18px "Segoe UI", system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('I.E. ECORESCATE · ICA', this.ANCHO / 2, 155);
+        // Friso rojo institucional del colegio
+        ctx.fillStyle = '#B91C1C';
+        ctx.fillRect(44, 182, 912, 6);
 
-        // Pared exterior general del pabellón de aulas
-        ctx.fillStyle = '#D9C3A0';
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 3.5;
+        // Columnas maestras de soporte estructural
+        const columnas = [42, 498, 954];
+        columnas.forEach(cx => {
+            const gradCol = ctx.createLinearGradient(cx - 7, 0, cx + 7, 0);
+            gradCol.addColorStop(0, '#E2E8F0');
+            gradCol.addColorStop(0.4, '#FFFFFF');
+            gradCol.addColorStop(1, '#94A3B8');
+
+            ctx.fillStyle = gradCol;
+            ctx.beginPath();
+            ctx.roundRect(cx - 6, 188, 12, 356, 3);
+            ctx.fill();
+            ctx.stroke();
+        });
+
+        // Losa intermedia entre pisos (Piso 1 y Piso 2)
+        const gradLosa = ctx.createLinearGradient(0, 360, 0, 374);
+        gradLosa.addColorStop(0, '#F1F5F9');
+        gradLosa.addColorStop(0.5, '#CBD5E1');
+        gradLosa.addColorStop(1, '#64748B');
+        ctx.fillStyle = gradLosa;
         ctx.beginPath();
-        ctx.roundRect(44, 172, 912, 374, 4);
+        ctx.roundRect(40, 360, 920, 14, 3);
         ctx.fill();
         ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarAmbiente(ctx, a, factorNoche) {
@@ -520,106 +565,118 @@ class ApagaAhorra extends MinijuegoBase {
         const luzEncendida = a.foco.encendido;
 
         ctx.save();
-        // Recortar al marco del aula
+        // 1. Recortar estrictamente al marco del aula
         ctx.beginPath();
         ctx.rect(x, y, w, h);
         ctx.clip();
 
-        // Color de la pared (se oscurece si la luz está apagada)
+        // 2. Color de la pared (luminoso si la luz está encendida, penumbra si está apagada)
         if (luzEncendida) {
             ctx.fillStyle = a.pared;
             ctx.fillRect(x, y, w, h);
 
-            // Halo cálido radial de la iluminación
-            const gradHalo = ctx.createRadialGradient(x + w / 2, y + 46, 10, x + w / 2, y + 46, 170);
-            gradHalo.addColorStop(0, 'rgba(255, 240, 160, 0.45)');
-            gradHalo.addColorStop(1, 'rgba(255, 240, 160, 0)');
+            // Resplandor cálido radial del foco
+            const gradHalo = ctx.createRadialGradient(x + w / 2, y + 48, 10, x + w / 2, y + 54, 180);
+            gradHalo.addColorStop(0, 'rgba(254, 240, 138, 0.48)');
+            gradHalo.addColorStop(0.5, 'rgba(253, 224, 71, 0.18)');
+            gradHalo.addColorStop(1, 'rgba(250, 204, 21, 0)');
             ctx.fillStyle = gradHalo;
             ctx.fillRect(x, y, w, h);
         } else {
-            // Penumbra en aula apagada
-            ctx.fillStyle = this.mezclarColor(a.pared, '#252B42', 0.58);
+            // Penumbra en aula que apaga la luz para ahorrar energía
+            ctx.fillStyle = this.mezclarColor(a.pared, '#0F172A', 0.65);
             ctx.fillRect(x, y, w, h);
         }
 
-        // Zócalo inferior del aula
-        ctx.fillStyle = luzEncendida ? a.zocalo : this.mezclarColor(a.zocalo, '#1F2438', 0.65);
-        ctx.fillRect(x, y + h - 14, w, 14);
+        // 3. Zócalo inferior del aula
+        ctx.fillStyle = luzEncendida ? a.zocalo : this.mezclarColor(a.zocalo, '#1E1B4B', 0.65);
+        ctx.fillRect(x, y + h - 16, w, 16);
 
-        // Ventana del aula que mira hacia afuera
+        // Moldura del zócalo
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, y + h - 16);
+        ctx.lineTo(x + w, y + h - 16);
+        ctx.stroke();
+
+        // 4. Ventana del aula que mira hacia afuera
         this.dibujarVentanaAula(ctx, x + 16, y + 42, 58, 52, factorNoche);
 
-        // Carpetas y alumnos
+        // 5. Carpetas escolares y alumnos presentes
         this.dibujarCarpetasYAlumnos(ctx, a, luzEncendida);
 
-        // Foco de techo
+        // 6. Foco colgante del techo
         this.dibujarFoco(ctx, a.foco, x + w / 2, y);
 
-        // Aparato según tipo (TV, Computadora o Ventilador)
-        this.dibujarAparato(ctx, a.aparato, luzEncendida);
+        // 7. Aparato electrónico si tiene (TV o PC)
+        if (a.aparato) {
+            this.dibujarAparato(ctx, a.aparato, luzEncendida);
+        }
 
-        // Cargador enchufe de pared
-        this.dibujarCargador(ctx, a.cargador);
+        // 8. Cargador de celular vampiro en tomacorriente de pared
+        if (a.cargador) {
+            this.dibujarCargador(ctx, a.cargador);
+        }
 
-        // Carteles de cabecera: Nombre de aula y Estado ("En clase" o "Vacío")
+        // 9. Cartel identificador del aula
         this.dibujarCartelAula(ctx, a, x, y, w);
 
-        ctx.restore();
-
-        // Contorno general del aula
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.5;
+        // 10. Marco perimetral del aula
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2.4;
         ctx.strokeRect(x, y, w, h);
 
-        // Ayuda visual para niveles 1 a 4: botones rojos parpadeantes
-        if (this.nivelNumero <= 4) {
-            const equipos = [a.foco, a.aparato, a.cargador];
-            equipos.forEach(e => {
-                const gasta = e.encendido && (!hayAlumnos || e.tipo === 'CARGADOR');
-                if (gasta) {
-                    const bx = e.tipo === 'FOCO' ? e.zona.x + e.zona.w + 6 : e.zona.x + e.zona.w / 2;
-                    const by = e.tipo === 'FOCO' ? e.zona.y + e.zona.h / 2 : e.zona.y - 4;
-                    this.dibujarBotonAvisoApagar(ctx, bx, by);
-                }
-            });
-        }
+        ctx.restore();
     }
 
     dibujarVentanaAula(ctx, vx, vy, vw, vh, factorNoche) {
-        // Marco de la ventana
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#2A2340';
+        ctx.save();
+        // Marco de aluminio blanco de la ventana
+        ctx.fillStyle = '#F8FAFC';
+        ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(vx, vy, vw, vh, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Vidrio con el color del exterior
-        const vidX = vx + 4, vidY = vy + 4, vidW = vw - 8, vidH = vh - 8;
-        const gradVidrio = ctx.createLinearGradient(vidX, vidY, vidX, vidY + vidH);
+        // Cristal con vista al exterior según la hora
+        const gradCristal = ctx.createLinearGradient(0, vy, 0, vy + vh);
         if (factorNoche < 0.4) {
-            gradVidrio.addColorStop(0, '#5B5C9A');
-            gradVidrio.addColorStop(1, '#F0A66A');
+            gradCristal.addColorStop(0, '#38BDF8');
+            gradCristal.addColorStop(1, '#FED7AA');
         } else if (factorNoche < 0.75) {
-            gradVidrio.addColorStop(0, '#2D1B69');
-            gradVidrio.addColorStop(1, '#D97706');
+            gradCristal.addColorStop(0, '#4338CA');
+            gradCristal.addColorStop(1, '#FB923C');
         } else {
-            gradVidrio.addColorStop(0, '#0F172A');
-            gradVidrio.addColorStop(1, '#1E1B4B');
+            gradCristal.addColorStop(0, '#0F172A');
+            gradCristal.addColorStop(1, '#1E1B4B');
         }
-        ctx.fillStyle = gradVidrio;
-        ctx.fillRect(vidX, vidY, vidW, vidH);
+        ctx.fillStyle = gradCristal;
+        ctx.beginPath();
+        ctx.roundRect(vx + 4, vy + 4, vw - 8, vh - 8, 3);
+        ctx.fill();
 
-        // División de la ventana (cruz central)
+        // Travesaño y montante de la ventana
         ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(vidX + vidW / 2, vidY);
-        ctx.lineTo(vidX + vidW / 2, vidY + vidH);
-        ctx.moveTo(vidX, vidY + vidH / 2);
-        ctx.lineTo(vidX + vidW, vidY + vidH / 2);
+        ctx.moveTo(vx + vw / 2, vy + 4);
+        ctx.lineTo(vx + vw / 2, vy + vh - 4);
+        ctx.moveTo(vx + 4, vy + vh / 2);
+        ctx.lineTo(vx + vw - 4, vy + vh / 2);
         ctx.stroke();
+
+        // Reflejos diagonales en el vidrio
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(vx + 10, vy + 30);
+        ctx.lineTo(vx + 26, vy + 12);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     dibujarCarpetasYAlumnos(ctx, a, luzEncendida) {
@@ -771,52 +828,85 @@ class ApagaAhorra extends MinijuegoBase {
     }
 
     dibujarFoco(ctx, foco, cx, techoY) {
+        ctx.save();
         const cy = techoY + 48;
         const hover = foco.encendido && this.puntoEnRect(this.ratonX, this.ratonY, foco.zona, 6);
 
         // Cable negro colgante desde el techo
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
         ctx.moveTo(cx, techoY);
         ctx.lineTo(cx, cy - 18);
         ctx.stroke();
 
-        // Roseta / soquete metálico
-        ctx.fillStyle = '#64748B';
+        // Roseta / portalámparas de baquelita / bronce
+        const gradRoseta = ctx.createLinearGradient(cx - 7, cy - 22, cx + 7, cy - 14);
+        gradRoseta.addColorStop(0, '#94A3B8');
+        gradRoseta.addColorStop(0.5, '#64748B');
+        gradRoseta.addColorStop(1, '#334155');
+        ctx.fillStyle = gradRoseta;
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.roundRect(cx - 7, cy - 22, 14, 8, 2);
         ctx.fill();
         ctx.stroke();
 
-        // Bombilla
-        ctx.fillStyle = foco.encendido ? '#FDE047' : '#CBD5E1';
-        ctx.strokeStyle = '#2A2340';
+        // Corona de resplandor activo si está encendido
+        if (foco.encendido) {
+            const gradGlow = ctx.createRadialGradient(cx, cy, 6, cx, cy, 32);
+            gradGlow.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
+            gradGlow.addColorStop(0.5, 'rgba(250, 204, 21, 0.45)');
+            gradGlow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = gradGlow;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Bombilla de vidrio con volumen esférico
+        const gradFoco = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, 14);
+        if (foco.encendido) {
+            gradFoco.addColorStop(0, '#FFFFFF');
+            gradFoco.addColorStop(0.4, '#FEF08A');
+            gradFoco.addColorStop(0.85, '#FACC15');
+            gradFoco.addColorStop(1, '#EAB308');
+        } else {
+            gradFoco.addColorStop(0, '#F1F5F9');
+            gradFoco.addColorStop(0.5, '#CBD5E1');
+            gradFoco.addColorStop(1, '#94A3B8');
+        }
+
+        ctx.fillStyle = gradFoco;
+        ctx.strokeStyle = '#0F172A';
         ctx.lineWidth = 2.2;
         ctx.beginPath();
         ctx.arc(cx, cy, 14, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Filamento interno del foco
+        // Filamento de tungsteno visible si está apagado
         if (!foco.encendido) {
-            ctx.strokeStyle = '#94A3B8';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#64748B';
+            ctx.lineWidth = 1.4;
             ctx.beginPath();
-            ctx.moveTo(cx - 4, cy - 4);
+            ctx.moveTo(cx - 5, cy - 3);
             ctx.lineTo(cx, cy - 8);
-            ctx.lineTo(cx + 4, cy - 4);
+            ctx.lineTo(cx + 5, cy - 3);
             ctx.stroke();
         }
 
-        // Resplandor de selección interactiva al pasar el mouse
+        // Aura interactiva al pasar el cursor (hover)
         if (hover) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.strokeStyle = '#38BDF8';
             ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.arc(cx, cy, 22, 0, Math.PI * 2);
             ctx.stroke();
         }
+
+        ctx.restore();
     }
 
     dibujarAparato(ctx, aparato, luzEncendida) {
@@ -994,66 +1084,102 @@ class ApagaAhorra extends MinijuegoBase {
     }
 
     dibujarCargador(ctx, cargador) {
+        ctx.save();
         const { x, y, w, h } = cargador.zona;
         const hover = cargador.encendido && this.puntoEnRect(this.ratonX, this.ratonY, cargador.zona, 6);
 
-        // Placa del tomacorriente de pared
-        ctx.fillStyle = '#F8FAFC';
-        ctx.strokeStyle = '#2A2340';
+        // Placa del tomacorriente de pared con relieve y tornillos
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#1E293B';
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.roundRect(x + 6, y, 26, 30, 4);
+        ctx.roundRect(x + 5, y, 28, 32, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Ranuras del enchufe
-        ctx.fillStyle = '#2A2340';
-        ctx.fillRect(x + 13, y + 8, 3, 7);
-        ctx.fillRect(x + 21, y + 8, 3, 7);
+        // Tornillitos de fijación
+        ctx.fillStyle = '#94A3B8';
+        ctx.beginPath();
+        ctx.arc(x + 19, y + 4, 1.2, 0, Math.PI * 2);
+        ctx.arc(x + 19, y + 28, 1.2, 0, Math.PI * 2);
+        ctx.fill();
 
-        // Si el cargador NO está encendido, solo se ve la toma libre
-        if (!cargador.encendido) return;
+        // Ranuras universales del tomacorriente
+        ctx.fillStyle = '#0F172A';
+        ctx.fillRect(x + 12, y + 10, 3, 7);
+        ctx.fillRect(x + 23, y + 10, 3, 7);
 
-        // Cuerpo del cargador conectado en la pared
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#2A2340';
+        // Si el cargador NO está conectado (ya se desconectó), solo se muestra la toma libre
+        if (!cargador.encendido) {
+            ctx.restore();
+            return;
+        }
+
+        // Sombra del cargador en la pared
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+        ctx.beginPath();
+        ctx.roundRect(x + 10, y + 6, 22, 22, 4);
+        ctx.fill();
+
+        // Transformador / cuerpo del cargador blanco con bisel
+        const gradCarg = ctx.createLinearGradient(x + 8, y + 4, x + 30, y + 26);
+        gradCarg.addColorStop(0, '#FFFFFF');
+        gradCarg.addColorStop(0.7, '#F1F5F9');
+        gradCarg.addColorStop(1, '#CBD5E1');
+
+        ctx.fillStyle = gradCarg;
+        ctx.strokeStyle = '#0F172A';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(x + 9, y + 4, 20, 20, 4);
+        ctx.roundRect(x + 8, y + 4, 22, 22, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Luz LED azul indicadora de consumo fantasma
-        ctx.fillStyle = '#0284C7';
+        // Luz LED piloto parpadeante de "consumo fantasma"
+        const pulsoLED = Math.sin(this.relojTotal * 8) * 0.3 + 0.7;
+        ctx.fillStyle = `rgba(239, 68, 68, ${pulsoLED})`;
         ctx.beginPath();
-        ctx.arc(x + 19, y + 12, 3, 0, Math.PI * 2);
+        ctx.arc(x + 19, y + 13, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cable negro colgante suelto en el suelo (¡sin celular!)
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2.2;
+        // Chispitas de energía desperdiciada (vampiro eléctrico)
+        for (let ch = 0; ch < 3; ch++) {
+            const ang = (ch * Math.PI * 2) / 3 + this.relojTotal * 5;
+            const cxp = x + 19 + Math.cos(ang) * 9;
+            const cyp = y + 13 + Math.sin(ang) * 9;
+            ctx.fillStyle = '#FBBF24';
+            ctx.beginPath();
+            ctx.arc(cxp, cyp, 1.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Cable negro colgante suelto en el suelo sin celular
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.moveTo(x + 19, y + 24);
-        ctx.quadraticCurveTo(x + 30, y + 40, x + 12, y + 46);
+        ctx.moveTo(x + 19, y + 26);
+        ctx.quadraticCurveTo(x + 32, y + 42, x + 12, y + 48);
         ctx.stroke();
 
         // Conector USB libre en la punta
-        ctx.fillStyle = '#475569';
-        ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 1.4;
+        ctx.fillStyle = '#334155';
         ctx.beginPath();
-        ctx.roundRect(x + 6, y + 42, 10, 6, 2);
+        ctx.roundRect(x + 6, y + 44, 11, 7, 2);
         ctx.fill();
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 1.4;
         ctx.stroke();
 
-        // Resplandor de selección si el mouse pasa sobre él
+        // Anillo interactivo de hover
         if (hover) {
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
+            ctx.strokeStyle = '#38BDF8';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.roundRect(x, y - 4, w + 4, h + 8, 8);
+            ctx.roundRect(x - 2, y - 4, w + 6, h + 10, 8);
             ctx.stroke();
         }
+
+        ctx.restore();
     }
 
     dibujarCartelAula(ctx, a, x, y, w) {
