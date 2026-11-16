@@ -867,12 +867,7 @@ class MinijuegoBase {
             this.dibujarToast(ctx);
         }
 
-        // 6. Controles táctiles virtuales para celular
-        if (this.esDispositivoTactil || window.innerWidth < 850) {
-            this.dibujarControlesTactiles(ctx);
-        }
-
-        // 7. Modales de pantalla (Intro, Pausa, Dato Curioso, Desafío del Saber, Fin)
+        // 6. Modales de pantalla (Intro, Pausa, Dato Curioso, Desafío del Saber, Fin)
         if (this.estado === 'INTRO') {
             this.dibujarModalIntro(ctx);
         } else if (this.estado === 'PAUSA' && !this.modalDatoActivo) {
@@ -1540,48 +1535,7 @@ class MinijuegoBase {
     }
 
     dibujarControlesTactiles(ctx) {
-        // D-Pad a la izquierda
-        const dpadX = 90;
-        const dpadY = this.ESC_ABA - 80;
-        const btnTam = 48;
-
-        const dibujarBotonDir = (x, y, icono, activa) => {
-            ctx.fillStyle = activa ? '#FFD84D' : 'rgba(45, 27, 105, 0.65)';
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.roundRect(x - btnTam / 2, y - btnTam / 2, btnTam, btnTam, 12);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = activa ? '#2D1B69' : '#FFFFFF';
-            ctx.font = 'bold 22px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(icono, x, y);
-        };
-
-        dibujarBotonDir(dpadX, dpadY - btnTam - 4, '▲', this.dpadActivo.up);
-        dibujarBotonDir(dpadX, dpadY + btnTam + 4, '▼', this.dpadActivo.down);
-        dibujarBotonDir(dpadX - btnTam - 4, dpadY, '◀', this.dpadActivo.left);
-        dibujarBotonDir(dpadX + btnTam + 4, dpadY, '▶', this.dpadActivo.right);
-
-        // Botón de acción a la derecha
-        const actX = this.ANCHO - 90;
-        const actY = this.ESC_ABA - 80;
-        ctx.fillStyle = this.dpadActivo.action ? '#FF6B6B' : 'rgba(235, 87, 87, 0.75)';
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(actX, actY, 36, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 16px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('ACCIÓN', actX, actY);
+        // Controles virtuales superpuestos removidos a petición para dejar la pantalla limpia y usar toque directo
     }
 
     // Modal de Introducción al Nivel
