@@ -495,7 +495,7 @@ class GuardianAgua extends MinijuegoBase {
             const bx = cx - 32 + brillo * 64;
             const by = cy + 18 + brillo * 72;
             ctx.fillStyle = `rgba(255, 255, 255, ${Math.sin(brillo * Math.PI) * 0.9})`;
-            this.dibujarEstrellaForma(ctx, bx, by, 7.5, '#FFFFFF');
+            this.dibujarDestelloEspejo(ctx, bx, by, 7.5, '#FFFFFF');
         }
 
         ctx.restore();
@@ -1163,15 +1163,39 @@ class GuardianAgua extends MinijuegoBase {
         ctx.fill();
     }
 
+    // Destello brillante en los espejos del baño (efecto visual de 4 puntas exclusivo para reflejo de espejo)
+    dibujarDestelloEspejo(ctx, cx, cy, radio, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#2A2340';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const r = i % 2 === 0 ? radio : radio * 0.35;
+            const a = -Math.PI / 2 + (i * Math.PI) / 4;
+            const x = cx + Math.cos(a) * r;
+            const y = cy + Math.sin(a) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Estrella clásica de 5 puntas idéntica a Limpieza Monstruosa
     dibujarEstrellaForma(ctx, cx, cy, radio, color) {
         ctx.save();
         ctx.fillStyle = color;
         ctx.strokeStyle = '#2A2340';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        for (let i = 0; i < 8; i++) {
-            const r = i % 2 === 0 ? radio : radio * 0.4;
-            const a = -Math.PI / 2 + (i * Math.PI) / 4;
+        for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? radio : radio * 0.45;
+            const a = -Math.PI / 2 + (i * Math.PI) / 5;
             const x = cx + Math.cos(a) * r;
             const y = cy + Math.sin(a) * r;
             if (i === 0) ctx.moveTo(x, y);

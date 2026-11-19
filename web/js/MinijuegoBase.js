@@ -1199,8 +1199,8 @@ class MinijuegoBase {
         // Botón Menú / Niveles
         this.dibujarBoton(ctx, this.ESC_X + 14, 24, 108, 42, '← Niveles', '#334155', '#FFFFFF', 13.5);
 
-        // Botón Pausa
-        this.dibujarBoton(ctx, this.ESC_X + 130, 24, 76, 42, this.estado === 'PAUSA' ? '▶ Seguir' : '⏸ Pausa', '#334155', '#FFFFFF', 13);
+        // Botón Pausa (renderizado vectorial nítido para celulares, sin emojis)
+        this.dibujarBotonPausa(ctx, this.ESC_X + 130, 24, 80, 42);
 
         // Título del juego y Nivel
         ctx.fillStyle = '#FFFFFF';
@@ -1344,33 +1344,18 @@ class MinijuegoBase {
         ctx.restore();
     }
 
-    dibujarEstrellaForma(ctx, cx, cy, radio, colorRelleno, colorBorde = '#1E293B', puntas = 5) {
+    // Estrella clásica de 5 puntas estilo cartoon (idéntica a Limpieza Monstruosa)
+    dibujarEstrellaForma(ctx, cx, cy, radio, color, colorBorde = '#2A2340', anchoBorde = 3) {
         ctx.save();
-        const estaActiva = colorRelleno !== '#CBD5E1' && colorRelleno !== '#475569';
-
-        if (estaActiva) {
-            ctx.shadowColor = 'rgba(245, 158, 11, 0.55)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 2;
-        }
-
-        // Gradiente dorado volumétrico
-        let relleno = colorRelleno;
-        if (estaActiva) {
-            const grad = ctx.createRadialGradient(cx, cy - radio * 0.2, 2, cx, cy, radio);
-            grad.addColorStop(0, '#FEF9C3');
-            grad.addColorStop(0.35, '#FBBF24');
-            grad.addColorStop(1, '#B45309');
-            relleno = grad;
-        }
-
-        ctx.fillStyle = relleno;
-        ctx.strokeStyle = estaActiva ? '#78350F' : '#334155';
-        ctx.lineWidth = 1.8;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = colorBorde;
+        ctx.lineWidth = anchoBorde;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        for (let i = 0; i < puntas * 2; i++) {
+        for (let i = 0; i < 10; i++) {
             const r = i % 2 === 0 ? radio : radio * 0.45;
-            const a = -Math.PI / 2 + (i * Math.PI) / puntas;
+            const a = -Math.PI / 2 + (i * Math.PI) / 5;
             const x = cx + Math.cos(a) * r;
             const y = cy + Math.sin(a) * r;
             if (i === 0) ctx.moveTo(x, y);
@@ -1379,27 +1364,6 @@ class MinijuegoBase {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-
-        // Facetas 3D doradas (aristas internas como estrella de videojuego de consola)
-        if (estaActiva) {
-            ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.lineWidth = 1.2;
-            for (let i = 0; i < puntas; i++) {
-                const a = -Math.PI / 2 + (i * 2 * Math.PI) / puntas;
-                ctx.beginPath();
-                ctx.moveTo(cx, cy);
-                ctx.lineTo(cx + Math.cos(a) * radio, cy + Math.sin(a) * radio);
-                ctx.stroke();
-            }
-
-            // Destello de diamante en el centro
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath();
-            ctx.arc(cx, cy - radio * 0.2, radio * 0.12, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
         ctx.restore();
     }
 
@@ -1938,6 +1902,98 @@ class MinijuegoBase {
         ctx.fillRect(0, 0, this.ANCHO, this.ALTO);
     }
 
+    // Botón de Pausa / Reanudar renderizado vectorialmente (libre de fallos de emojis en móviles)
+    dibujarBotonPausa(ctx, x, y, w, h) {
+        ctx.save();
+
+        const pausado = this.estado === 'PAUSA';
+        const colorFondo = pausado ? '#059669' : '#334155'; // Verde esmeralda si está en pausa para invitar a reanudar, slate si está jugando
+
+        // Sombra / Bisel 3D inferior del botón
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+        ctx.beginPath();
+        ctx.roundRect(x, y + 4, w, h, 12);
+        ctx.fill();
+
+        // Cara del botón con gradiente vertical (luz cenital)
+        const gradBtn = ctx.createLinearGradient(0, y, 0, y + h);
+        gradBtn.addColorStop(0, this.aclararColor(colorFondo, 0.25));
+        gradBtn.addColorStop(1, this.oscurecerColor(colorFondo, 0.2));
+
+        ctx.fillStyle = gradBtn;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 12);
+        ctx.fill();
+
+        // Borde superior brillante (reflejo especular)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 1, y + 1, w - 2, h / 2, [11, 11, 0, 0]);
+        ctx.stroke();
+
+        // Contorno general limpio
+        ctx.strokeStyle = pausado ? 'rgba(5, 150, 105, 0.8)' : 'rgba(15, 23, 42, 0.5)';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 12);
+        ctx.stroke();
+
+        // Sombra para el icono y texto
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1.5;
+        ctx.shadowBlur = 3;
+
+        ctx.fillStyle = '#FFFFFF';
+
+        if (pausado) {
+            // Icono vectorial de REANUDAR (triángulo play nítido sin emojis)
+            const iconX = x + 13;
+            const triH = 14;
+            const triW = 11;
+            const iconY = y + (h - triH) / 2;
+
+            ctx.beginPath();
+            ctx.moveTo(iconX, iconY);
+            ctx.lineTo(iconX + triW, iconY + triH / 2);
+            ctx.lineTo(iconX, iconY + triH);
+            ctx.closePath();
+            ctx.fill();
+
+            // Texto "Seguir"
+            ctx.font = '900 13px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Seguir', iconX + triW + 6, y + h / 2);
+        } else {
+            // Icono vectorial de PAUSA (dos barras verticales redondeadas, sin emojis)
+            const iconX = x + 14;
+            const barW = 3.5;
+            const barH = 13.5;
+            const barGap = 3.5;
+            const barY = y + (h - barH) / 2;
+
+            // Barra 1
+            ctx.beginPath();
+            ctx.roundRect(iconX, barY, barW, barH, 1.5);
+            ctx.fill();
+
+            // Barra 2
+            ctx.beginPath();
+            ctx.roundRect(iconX + barW + barGap, barY, barW, barH, 1.5);
+            ctx.fill();
+
+            // Texto "Pausa"
+            ctx.font = '900 13px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Pausa', iconX + barW * 2 + barGap + 6, y + h / 2);
+        }
+
+        ctx.restore();
+    }
+
     dibujarBoton(ctx, x, y, w, h, texto, fondo, colorTexto, tamFuente = 16) {
         ctx.save();
 
@@ -2054,6 +2110,16 @@ class MinijuegoBase {
 
         // 3. Si estamos en PAUSA
         if (this.estado === 'PAUSA') {
+            // Permitir tocar también el botón superior de Seguir / Niveles desde el HUD (crucial para móviles)
+            if (x >= this.ESC_X + 120 && x <= this.ESC_X + 220 && y >= 16 && y <= 74) {
+                this.alternarPausa(); // Reanudar al tocar el botón superior
+                return;
+            }
+            if (x >= this.ESC_X + 8 && x <= this.ESC_X + 128 && y >= 16 && y <= 74) {
+                this.salirANiveles();
+                return;
+            }
+
             const w = 420, h = 280;
             const mx = (this.ANCHO - w) / 2, my = (this.ALTO - h) / 2;
             if (x >= mx + 60 && x <= mx + 360) {
@@ -2109,12 +2175,12 @@ class MinijuegoBase {
             return;
         }
 
-        // 6. Botones del HUD
-        if (x >= this.ESC_X + 14 && x <= this.ESC_X + 124 && y >= 26 && y <= 66) {
+        // 6. Botones del HUD (área táctil ampliada para pantallas táctiles y celulares)
+        if (x >= this.ESC_X + 8 && x <= this.ESC_X + 128 && y >= 16 && y <= 74) {
             this.salirANiveles();
             return;
         }
-        if (x >= this.ESC_X + 134 && x <= this.ESC_X + 209 && y >= 26 && y <= 66) {
+        if (x >= this.ESC_X + 120 && x <= this.ESC_X + 220 && y >= 16 && y <= 74) {
             this.alternarPausa();
             return;
         }

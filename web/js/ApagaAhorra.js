@@ -1262,6 +1262,29 @@ class ApagaAhorra extends MinijuegoBase {
         const bl = Math.round(a[2] + (b[2] - a[2]) * proporcion);
         return `rgb(${r}, ${g}, ${bl})`;
     }
+
+    // Estrella clásica de 5 puntas idéntica a Limpieza Monstruosa
+    dibujarEstrellaForma(ctx, cx, cy, radio, color) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#2A2340';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? radio : radio * 0.45;
+            const a = -Math.PI / 2 + (i * Math.PI) / 5;
+            const x = cx + Math.cos(a) * r;
+            const y = cy + Math.sin(a) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    }
 }
 
 // Exponer la clase globalmente para el orquestador
