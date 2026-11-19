@@ -218,6 +218,13 @@ class AppEcoRescate {
         if (this.btnDescargarReporteDocente) {
             this.btnDescargarReporteDocente.addEventListener('click', () => {
                 window.audioEco.moneda();
+                window.storageEco.exportarExcel();
+            });
+        }
+        const btnDescargarCSV = document.getElementById('btnDescargarCSV');
+        if (btnDescargarCSV) {
+            btnDescargarCSV.addEventListener('click', () => {
+                window.audioEco.moneda();
                 window.storageEco.exportarCSV();
             });
         }

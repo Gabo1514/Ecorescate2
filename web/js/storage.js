@@ -690,40 +690,430 @@ class GestorAlmacenamiento {
         };
     }
 
-    // Exportar informe docente de todas las partidas a CSV separado por ';' con BOM UTF-8
+    // Exportar informe pedagógico docente con formato enriquecido para Microsoft Excel (.xls)
+    exportarExcel() {
+        const escapeXml = (unsafe) => {
+            if (unsafe === undefined || unsafe === null) return '';
+            return String(unsafe)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        };
+
+        const formatearFecha = (fStr) => {
+            if (!fStr) return '-';
+            try {
+                const f = new Date(String(fStr).replace(' ', 'T'));
+                if (isNaN(f.getTime())) return String(fStr);
+                const d = String(f.getDate()).padStart(2, '0');
+                const m = String(f.getMonth() + 1).padStart(2, '0');
+                const y = f.getFullYear();
+                const hh = String(f.getHours()).padStart(2, '0');
+                const mm = String(f.getMinutes()).padStart(2, '0');
+                return `${d}/${m}/${y} ${hh}:${mm}`;
+            } catch (e) {
+                return String(fStr);
+            }
+        };
+
+        let totalPartidas = 0;
+        let sumaNotas = 0;
+        let sumaPuntaje = 0;
+        let sumaAciertos = 0;
+        let sumaErrores = 0;
+        let aguaAhorrada = 0;
+        let residuosReciclados = 0;
+        let energiaAhorrada = 0;
+        let areaVerde = 0;
+        const filasPartidas = [];
+
+        for (const k in this.perfiles) {
+            const p = this.perfiles[k];
+            for (const s of (p.partidas || [])) {
+                totalPartidas++;
+                const notaPartida = Number(s.nota) || (s.superado === 'SI' || s.superado === true ? 18 : 8);
+                sumaNotas += notaPartida;
+                sumaPuntaje += (Number(s.puntaje) || 0);
+                sumaAciertos += (Number(s.aciertos) || 0);
+                sumaErrores += (Number(s.errores) || 0);
+
+                const impactoVal = Number(s.impacto) || 0;
+                if (s.juegoId === 'AGUA') aguaAhorrada += impactoVal;
+                else if (s.juegoId === 'LIMPIEZA') residuosReciclados += impactoVal;
+                else if (s.juegoId === 'ENERGIA') energiaAhorrada += impactoVal;
+                else if (s.juegoId === 'VERDE') areaVerde += impactoVal;
+
+                const superado = (s.superado === 'SI' || s.superado === true);
+                const pregunta = (s.preguntaCorrecta === true || s.preguntaCorrecta === 'SI')
+                    ? 'CORRECTA'
+                    : ((s.preguntaCorrecta === false || s.preguntaCorrecta === 'NO') ? 'INCORRECTA' : 'N/A');
+
+                let escalaLiteral = s.escala;
+                let escalaDesc = s.escalaDesc;
+                if (!escalaLiteral) {
+                    const esc = (typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(notaPartida) : { literal: 'A', descripcion: 'Logro Esperado' };
+                    escalaLiteral = esc.literal;
+                    escalaDesc = esc.descripcion;
+                }
+
+                filasPartidas.push({
+                    dni: p.dni || p.codigo || 'S/DNI',
+                    nombre: p.nombre || 'Estudiante',
+                    grado: p.grado ? `${p.grado}°` : '-',
+                    seccion: p.seccion || '-',
+                    fecha: formatearFecha(s.fecha),
+                    minijuego: s.minijuego || s.juegoId || '-',
+                    nivel: `Nivel ${s.nivel || 1}`,
+                    superado,
+                    puntaje: Number(s.puntaje) || 0,
+                    estrellas: Number(s.estrellas) || 0,
+                    nota: notaPartida,
+                    escalaLiteral: escalaLiteral || 'A',
+                    escalaDesc: escalaDesc || '',
+                    precision: s.precisionPct !== undefined ? `${s.precisionPct}%` : '100%',
+                    duracion: `${Math.floor((s.duracionSeg || 0) / 60)}:${String((s.duracionSeg || 0) % 60).padStart(2, '0')} min`,
+                    aciertos: Number(s.aciertos) || 0,
+                    errores: Number(s.errores) || 0,
+                    impacto: `${impactoVal.toFixed(2)} ${s.unidadImpacto || ''}`.trim(),
+                    pregunta,
+                    califDocente: p.calificacionDocente ? `${p.calificacionDocente} / 20` : 'Sin calificar',
+                    obsDocente: p.observacionDocente || 'Sin observación registrada'
+                });
+            }
+        }
+
+        const totalAlumnos = Object.keys(this.perfiles).length;
+        const promedioNotas = totalPartidas > 0 ? (sumaNotas / totalPartidas).toFixed(1) : '0.0';
+        const promedioPuntaje = totalPartidas > 0 ? Math.round(sumaPuntaje / totalPartidas) : 0;
+        const fechaActual = formatearFecha(new Date().toISOString());
+
+        let filasHtml = '';
+        filasPartidas.forEach((f, idx) => {
+            const claseFila = idx % 2 === 0 ? 'fila-par' : 'fila-impar';
+            const claseSuperado = f.superado ? 'superado-si' : 'superado-no';
+            let claseEscala = 'badge-a';
+            if (f.escalaLiteral === 'AD') claseEscala = 'badge-ad';
+            else if (f.escalaLiteral === 'B') claseEscala = 'badge-b';
+            else if (f.escalaLiteral === 'C') claseEscala = 'badge-c';
+
+            const estrellasStr = '★'.repeat(f.estrellas) + (f.estrellas > 0 ? ` (${f.estrellas})` : '0');
+
+            filasHtml += `
+            <tr class="${claseFila}">
+                <td class="celda txt-centro mso-texto">${escapeXml(f.dni)}</td>
+                <td class="celda txt-izq" style="font-weight: bold;">${escapeXml(f.nombre)}</td>
+                <td class="celda txt-centro">${escapeXml(f.grado)}</td>
+                <td class="celda txt-centro">${escapeXml(f.seccion)}</td>
+                <td class="celda txt-centro">${escapeXml(f.fecha)}</td>
+                <td class="celda txt-izq">${escapeXml(f.minijuego)}</td>
+                <td class="celda txt-centro">${escapeXml(f.nivel)}</td>
+                <td class="celda ${claseSuperado}">${f.superado ? 'SÍ' : 'NO'}</td>
+                <td class="celda txt-der mso-numero">${f.puntaje}</td>
+                <td class="celda txt-centro" style="color: #D97706; font-weight: bold;">${escapeXml(estrellasStr)}</td>
+                <td class="celda txt-centro" style="font-weight: bold; font-size: 11pt;">${f.nota}</td>
+                <td class="celda ${claseEscala}">${escapeXml(f.escalaLiteral + ' • ' + f.escalaDesc)}</td>
+                <td class="celda txt-der">${escapeXml(f.precision)}</td>
+                <td class="celda txt-centro">${escapeXml(f.duracion)}</td>
+                <td class="celda txt-der mso-numero" style="color: #15803D;">${f.aciertos}</td>
+                <td class="celda txt-der mso-numero" style="color: ${f.errores > 0 ? '#B91C1C' : '#64748B'};">${f.errores}</td>
+                <td class="celda txt-izq">${escapeXml(f.impacto)}</td>
+                <td class="celda txt-centro" style="font-weight: 700; color: ${f.pregunta === 'CORRECTA' ? '#15803D' : (f.pregunta === 'INCORRECTA' ? '#B91C1C' : '#64748B')};">${escapeXml(f.pregunta)}</td>
+                <td class="celda txt-centro" style="font-weight: 700; color: #1E293B;">${escapeXml(f.califDocente)}</td>
+                <td class="celda txt-izq" style="color: #475569;">${escapeXml(f.obsDocente)}</td>
+            </tr>`;
+        });
+
+        const htmlCompleto = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Informe Pedagógico EcoRescate</x:Name>
+                    <x:WorksheetOptions>
+                        <x:DisplayGridlines/>
+                    </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        body, table, td, th {
+            font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: #1E293B;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        .banner-principal {
+            background-color: #15803D;
+            color: #FFFFFF;
+            font-size: 15pt;
+            font-weight: bold;
+            text-align: center;
+            height: 42px;
+            vertical-align: middle;
+            border: 2px solid #166534;
+        }
+        .banner-sub {
+            background-color: #DCFCE7;
+            color: #14532D;
+            font-size: 10.5pt;
+            font-weight: bold;
+            text-align: center;
+            height: 26px;
+            vertical-align: middle;
+            border: 1px solid #BBF7D0;
+        }
+        .meta-etiqueta {
+            background-color: #F1F5F9;
+            color: #475569;
+            font-weight: bold;
+            font-size: 9.5pt;
+            border: 1px solid #CBD5E1;
+            padding: 6px 10px;
+        }
+        .meta-valor {
+            background-color: #FFFFFF;
+            color: #0F172A;
+            font-weight: bold;
+            font-size: 10pt;
+            border: 1px solid #CBD5E1;
+            padding: 6px 10px;
+        }
+        th.col-header {
+            background-color: #1E293B;
+            color: #FFFFFF;
+            font-weight: bold;
+            font-size: 10pt;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #0F172A;
+            height: 34px;
+            padding: 6px 8px;
+        }
+        td.celda {
+            border: 1px solid #CBD5E1;
+            padding: 6px 8px;
+            vertical-align: middle;
+            font-size: 9.5pt;
+        }
+        .fila-par { background-color: #FFFFFF; }
+        .fila-impar { background-color: #F8FAFC; }
+        .badge-ad { background-color: #DCFCE7; color: #15803D; font-weight: bold; text-align: center; }
+        .badge-a  { background-color: #EFF6FF; color: #1D4ED8; font-weight: bold; text-align: center; }
+        .badge-b  { background-color: #FEF9C3; color: #A16207; font-weight: bold; text-align: center; }
+        .badge-c  { background-color: #FEE2E2; color: #B91C1C; font-weight: bold; text-align: center; }
+        .superado-si { background-color: #DCFCE7; color: #166534; font-weight: bold; text-align: center; }
+        .superado-no { background-color: #FEE2E2; color: #991B1B; font-weight: bold; text-align: center; }
+        .fila-total {
+            background-color: #E2E8F0;
+            color: #0F172A;
+            font-weight: bold;
+            font-size: 10pt;
+            border-top: 3px double #475569;
+            border-bottom: 2px solid #475569;
+            height: 32px;
+        }
+        .txt-centro { text-align: center; }
+        .txt-izq { text-align: left; }
+        .txt-der { text-align: right; }
+        .mso-texto { mso-number-format: "\\@"; }
+        .mso-numero { mso-number-format: "\\#\\,\\#\\#0"; }
+    </style>
+</head>
+<body>
+    <table>
+        <colgroup>
+            <col width="110"> <!-- DNI -->
+            <col width="220"> <!-- Estudiante -->
+            <col width="65">  <!-- Grado -->
+            <col width="65">  <!-- Sección -->
+            <col width="135"> <!-- Fecha y Hora -->
+            <col width="175"> <!-- Minijuego -->
+            <col width="75">  <!-- Nivel -->
+            <col width="95">  <!-- Superado -->
+            <col width="90">  <!-- Puntaje -->
+            <col width="95">  <!-- Estrellas -->
+            <col width="85">  <!-- Nota (1-20) -->
+            <col width="170"> <!-- Nivel MINEDU -->
+            <col width="90">  <!-- Precisión -->
+            <col width="95">  <!-- Duración -->
+            <col width="75">  <!-- Aciertos -->
+            <col width="75">  <!-- Errores -->
+            <col width="180"> <!-- Impacto Ambiental -->
+            <col width="125"> <!-- Desafío del Saber -->
+            <col width="115"> <!-- Calif. Docente -->
+            <col width="320"> <!-- Observación Pedagógica -->
+        </colgroup>
+        <thead>
+            <tr>
+                <th colspan="20" class="banner-principal">OPERACIÓN ECORESCATE • INFORME PEDAGÓGICO DE DESEMPEÑO AMBIENTAL</th>
+            </tr>
+            <tr>
+                <th colspan="20" class="banner-sub">Monitoreo de Competencias Escolares y Métricas de Preservación del Medio Ambiente • Ica, Perú</th>
+            </tr>
+            <tr>
+                <td colspan="3" class="meta-etiqueta">Fecha de Emisión:</td>
+                <td colspan="4" class="meta-valor">${escapeXml(fechaActual)}</td>
+                <td colspan="3" class="meta-etiqueta">Total Estudiantes:</td>
+                <td colspan="3" class="meta-valor">${totalAlumnos} registrados</td>
+                <td colspan="3" class="meta-etiqueta">Partidas Evaluadas:</td>
+                <td colspan="4" class="meta-valor">${totalPartidas} registros</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="meta-etiqueta">Promedio General del Salón:</td>
+                <td colspan="4" class="meta-valor" style="color: #15803D;">${promedioNotas} / 20 (${promedioNotas >= 17 ? 'AD - Logro Destacado' : (promedioNotas >= 14 ? 'A - Logro Esperado' : 'B - En Proceso')})</td>
+                <td colspan="3" class="meta-etiqueta">Puntaje Promedio:</td>
+                <td colspan="3" class="meta-valor">${promedioPuntaje.toLocaleString()} pts</td>
+                <td colspan="3" class="meta-etiqueta">Impacto Ecológico Total:</td>
+                <td colspan="4" class="meta-valor" style="font-size: 9.5pt;">${residuosReciclados.toFixed(1)} kg reciclados • ${aguaAhorrada.toFixed(1)} L agua • ${energiaAhorrada.toFixed(1)} kWh</td>
+            </tr>
+            <tr>
+                <td colspan="20" style="height: 12px; border: none; background: transparent;"></td>
+            </tr>
+            <tr>
+                <th class="col-header">DNI / Código</th>
+                <th class="col-header">Estudiante</th>
+                <th class="col-header">Grado</th>
+                <th class="col-header">Sección</th>
+                <th class="col-header">Fecha y Hora</th>
+                <th class="col-header">Minijuego Ambiental</th>
+                <th class="col-header">Nivel</th>
+                <th class="col-header">Superado</th>
+                <th class="col-header">Puntaje</th>
+                <th class="col-header">Estrellas</th>
+                <th class="col-header">Nota (1-20)</th>
+                <th class="col-header">Escala MINEDU</th>
+                <th class="col-header">Precisión</th>
+                <th class="col-header">Duración</th>
+                <th class="col-header">Aciertos</th>
+                <th class="col-header">Errores</th>
+                <th class="col-header">Impacto Ambiental</th>
+                <th class="col-header">Desafío del Saber</th>
+                <th class="col-header">Calif. Docente</th>
+                <th class="col-header">Observación Pedagógica del Docente</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${filasHtml}
+        </tbody>
+        <tfoot>
+            <tr class="fila-total">
+                <td class="celda txt-centro" colspan="4">PROMEDIOS Y TOTALES:</td>
+                <td class="celda txt-centro" colspan="4">${totalPartidas} partidas analizadas</td>
+                <td class="celda txt-der mso-numero">${promedioPuntaje}</td>
+                <td class="celda txt-centro">-</td>
+                <td class="celda txt-centro">${promedioNotas}</td>
+                <td class="celda txt-centro">${promedioNotas >= 17 ? 'AD' : (promedioNotas >= 14 ? 'A' : 'B')}</td>
+                <td class="celda txt-der">${totalPartidas > 0 ? Math.round((sumaAciertos / Math.max(1, sumaAciertos + sumaErrores)) * 100) : 0}%</td>
+                <td class="celda txt-centro">-</td>
+                <td class="celda txt-der mso-numero" style="color: #15803D;">${sumaAciertos}</td>
+                <td class="celda txt-der mso-numero" style="color: ${sumaErrores > 0 ? '#B91C1C' : '#64748B'};">${sumaErrores}</td>
+                <td class="celda txt-izq" colspan="4">Impacto ambiental registrado en Ica</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>`;
+
+        const blob = new Blob(['\uFEFF' + htmlCompleto], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ecorescate_informe_docente_${new Date().toISOString().slice(0, 10)}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Exportar datos planos docentes a CSV con encabezados legibles en español
     exportarCSV() {
-        const CABECERA = 'dni_codigo;alumno;grado;seccion;fecha;codigo_juego;minijuego;puntaje;nivel;completado;aciertos;errores;precision_pct;duracion_seg;impacto;unidad_impacto;pregunta_correcta;estrellas;nota_vigesimal_1_20;escala_minedu;calificacion_docente;observacion_docente';
+        const CABECERA = [
+            'DNI / Código',
+            'Estudiante',
+            'Grado',
+            'Sección',
+            'Fecha y Hora',
+            'Minijuego',
+            'Nivel',
+            'Misión Superada',
+            'Puntaje (pts)',
+            'Estrellas',
+            'Nota Vigesimal (1 al 20)',
+            'Escala MINEDU',
+            'Precisión (%)',
+            'Duración (seg)',
+            'Aciertos',
+            'Errores',
+            'Impacto Cuantificado',
+            'Unidad de Impacto',
+            'Desafío del Saber',
+            'Calificación Docente',
+            'Observación Pedagógica'
+        ].join(';');
+
+        const formatearFecha = (fStr) => {
+            if (!fStr) return '-';
+            try {
+                const f = new Date(String(fStr).replace(' ', 'T'));
+                if (isNaN(f.getTime())) return String(fStr);
+                const d = String(f.getDate()).padStart(2, '0');
+                const m = String(f.getMonth() + 1).padStart(2, '0');
+                const y = f.getFullYear();
+                const hh = String(f.getHours()).padStart(2, '0');
+                const mm = String(f.getMinutes()).padStart(2, '0');
+                return `${d}/${m}/${y} ${hh}:${mm}`;
+            } catch (e) {
+                return String(fStr);
+            }
+        };
+
         const filas = [CABECERA];
 
         for (const k in this.perfiles) {
             const p = this.perfiles[k];
             for (const s of (p.partidas || [])) {
-                const notaPartida = s.nota || (s.superado === 'SI' ? 18 : 8);
+                const notaPartida = Number(s.nota) || (s.superado === 'SI' || s.superado === true ? 18 : 8);
                 const escalaPartida = s.escala || ((typeof obtenerEscalaMINEDU === 'function') ? obtenerEscalaMINEDU(notaPartida).literal : 'A');
+                const superado = (s.superado === 'SI' || s.superado === true) ? 'SÍ' : 'NO';
+                const pregunta = (s.preguntaCorrecta === true || s.preguntaCorrecta === 'SI')
+                    ? 'CORRECTA'
+                    : ((s.preguntaCorrecta === false || s.preguntaCorrecta === 'NO') ? 'INCORRECTA' : 'N/A');
+
                 const obsLimpia = (p.observacionDocente || '').replace(/"/g, '""');
 
                 const campos = [
                     p.dni || p.codigo || 'S/DNI',
-                    p.nombre,
-                    p.grado,
-                    p.seccion,
-                    s.fecha,
-                    s.juegoId,
-                    s.minijuego,
-                    s.puntaje,
-                    s.nivel,
-                    s.superado,
-                    s.aciertos,
-                    s.errores,
-                    s.precisionPct,
-                    s.duracionSeg,
-                    String(s.impacto).replace('.', ','),
-                    s.unidadImpacto,
-                    s.preguntaCorrecta,
-                    s.estrellas,
+                    `"${(p.nombre || '').replace(/"/g, '""')}"`,
+                    p.grado || '-',
+                    p.seccion || '-',
+                    formatearFecha(s.fecha),
+                    `"${(s.minijuego || s.juegoId || '').replace(/"/g, '""')}"`,
+                    s.nivel || 1,
+                    superado,
+                    s.puntaje || 0,
+                    s.estrellas || 0,
                     notaPartida,
                     escalaPartida,
-                    p.calificacionDocente || '',
+                    s.precisionPct !== undefined ? `${s.precisionPct}%` : '100%',
+                    s.duracionSeg || 0,
+                    s.aciertos || 0,
+                    s.errores || 0,
+                    String(s.impacto || 0).replace('.', ','),
+                    `"${(s.unidadImpacto || '').replace(/"/g, '""')}"`,
+                    pregunta,
+                    p.calificacionDocente ? `${p.calificacionDocente} / 20` : 'Sin calificar',
                     `"${obsLimpia}"`
                 ];
                 filas.push(campos.join(';'));
@@ -735,7 +1125,7 @@ class GestorAlmacenamiento {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ecorescate_informe_docente_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `ecorescate_datos_docente_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
